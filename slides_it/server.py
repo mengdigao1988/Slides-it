@@ -122,12 +122,6 @@ class TemplateEntry(BaseModel):
 class SessionRequest(BaseModel):
     session_id: str
     messages: list[dict] = []   # serialised ChatMessage[] from the frontend
-    description: str
-    author: str
-    version: str
-    builtin: bool
-    active: bool
-    has_preview: bool
 
 
 class InstallTemplateRequest(BaseModel):
