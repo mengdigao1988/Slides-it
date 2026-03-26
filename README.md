@@ -36,13 +36,27 @@ slides-it is powered by [OpenCode](https://opencode.ai) — an open-source AI co
 
 ## How to use
 
-**1. Install**
+**1. Install OpenCode**
+
+slides-it requires [OpenCode](https://opencode.ai) to run. Install it first:
+
+```bash
+curl -fsSL https://opencode.ai/install | sh
+```
+
+Then set your Anthropic API key:
+
+```bash
+export ANTHROPIC_API_KEY=your_key_here
+```
+
+**2. Install slides-it**
 
 ```bash
 curl -fsSL https://slides-it.dev/install.sh | sh
 ```
 
-**2. Run**
+**3. Run**
 
 ```bash
 slides-it
@@ -50,7 +64,7 @@ slides-it
 
 This opens the slides-it UI in your browser.
 
-**3. Describe your presentation**
+**4. Describe your presentation**
 
 Type what you want in the chat panel. For example:
 
@@ -58,11 +72,11 @@ Type what you want in the chat panel. For example:
 
 The AI will ask a few quick questions if needed (audience, slide count, language), then generate the complete slide deck.
 
-**4. Get your file**
+**5. Get your file**
 
 A self-contained `.html` file is written to your working directory. Open it in any browser — navigate with arrow keys or swipe.
 
-**5. Iterate in plain language**
+**6. Iterate in plain language**
 
 Want changes? Just say so:
 
