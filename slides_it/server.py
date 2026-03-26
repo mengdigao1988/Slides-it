@@ -291,6 +291,9 @@ def get_session() -> dict[str, object]:
     """
     Return the persisted session ID and message history for the current workspace.
 
+    Also ensures .slides-it/ exists — so this is safe to call regardless of
+    whether /api/start was called (e.g. on browser refresh).
+
     Layout inside <workspace>/.slides-it/:
       current                   — plain text, contains the active session ID
       session-<id>.json         — messages for that session
@@ -298,6 +301,8 @@ def get_session() -> dict[str, object]:
     if not _workspace_dir:
         return {"session_id": None, "messages": []}
     slides_dir = pathlib.Path(_workspace_dir) / ".slides-it"
+    # Ensure the directory exists unconditionally — browser refresh skips /api/start
+    slides_dir.mkdir(exist_ok=True)
     current_file = slides_dir / "current"
     if not current_file.exists():
         return {"session_id": None, "messages": []}

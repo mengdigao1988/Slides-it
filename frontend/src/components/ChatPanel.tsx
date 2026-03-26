@@ -265,22 +265,23 @@ export default function ChatPanel({ workspacePath, activeSkill, activeTemplate, 
     if (type === 'session.status') {
       const status = (properties.status as { type: string })?.type
       if (status === 'idle') {
-        // Skip during initSession — prevents the reconnected SSE stream from
-        // wiping restored messages before they're set in state
+        // Skip during initSession — prevents reconnected SSE from wiping restored messages
         if (restoringRef.current) return
         flushPending()
-        setMessages((prev) => {
-          const settled = prev.map((m) => m.streaming ? { ...m, streaming: false } : m)
-          // Persist full conversation after every agent turn
-          if (sessionIdRef.current) {
-            saveSession(sessionIdRef.current, settled).catch(() => {})
-          }
-          return settled
-        })
+        setMessages((prev) =>
+          prev.map((m) => m.streaming ? { ...m, streaming: false } : m)
+        )
         setSending(false)
         runningToolRef.current = ''
         setRunningTool('')
         detectHtmlFile()
+        // Push save to next event loop tick so React has committed state
+        // and messagesRef.current holds the fully settled messages
+        setTimeout(() => {
+          if (sessionIdRef.current) {
+            saveSession(sessionIdRef.current, messagesRef.current).catch(() => {})
+          }
+        }, 0)
       }
     }
 
@@ -512,8 +513,8 @@ export default function ChatPanel({ workspacePath, activeSkill, activeTemplate, 
     setSending(true)
 
     // Persist immediately so the user's message survives even if the agent crashes
-    if (sessionId) {
-      saveSession(sessionId, [...messagesRef.current, userMsg]).catch(() => {})
+    if (sessionIdRef.current) {
+      saveSession(sessionIdRef.current, [...messagesRef.current, userMsg]).catch(() => {})
     }
 
     try {
