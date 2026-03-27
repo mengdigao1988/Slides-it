@@ -12,7 +12,7 @@
 
 set -euo pipefail
 
-REPO="slides-it/slides-it"
+REPO="mengdigao1988/slides-it"
 INSTALL_DIR="${HOME}/.local/bin"
 
 # ---------------------------------------------------------------------------
