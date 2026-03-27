@@ -4,7 +4,7 @@ todo.md
 AGENTS.md
 *.jsonc
 opencode.json
-slides_it/templates/
+slides_it/templates/*/preview.html
 
 # Python
 __pycache__/
