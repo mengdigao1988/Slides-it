@@ -1,6 +1,6 @@
 # slides-it
 
-**Stop making slides. Start making points.**
+**Slides-it: Your agentic presentation partner**
 
 <p align="center">
   <img src="img/title-page.png" width="780" alt="slides-it — chat panel with AI Q&A on the left, generated slide preview on the right" />
