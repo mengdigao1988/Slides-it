@@ -18,8 +18,6 @@ jobs:
         include:
           - os: macos-14        # Apple Silicon (arm64)
             artifact: slides-it-macos-arm64
-          - os: macos-13        # Intel (x86_64)
-            artifact: slides-it-macos-x86_64
           - os: ubuntu-22.04    # Linux x86_64
             artifact: slides-it-linux-x86_64
 
@@ -43,13 +41,43 @@ jobs:
           version: 'latest'
 
       - name: Install Python dependencies
-        run: uv sync --all-extras
+        run: uv sync
 
       - name: Install PyInstaller
         run: uv add --dev pyinstaller
 
+      - name: Install frontend dependencies
+        run: npm install
+        working-directory: frontend
+
+      - name: Build frontend
+        run: npm run build
+        working-directory: frontend
+
       - name: Build binary
-        run: bash build.sh
+        run: |
+          uv run pyinstaller \
+            --onefile \
+            --name slides-it \
+            --add-data "slides_it/templates:slides_it/templates" \
+            --add-data "slides_it/skill:slides_it/skill" \
+            --add-data "frontend/dist:frontend/dist" \
+            --collect-all slides_it \
+            --hidden-import uvicorn.logging \
+            --hidden-import uvicorn.loops \
+            --hidden-import uvicorn.loops.auto \
+            --hidden-import uvicorn.protocols \
+            --hidden-import uvicorn.protocols.http \
+            --hidden-import uvicorn.protocols.http.auto \
+            --hidden-import uvicorn.protocols.websockets \
+            --hidden-import uvicorn.protocols.websockets.auto \
+            --hidden-import uvicorn.lifespan \
+            --hidden-import uvicorn.lifespan.on \
+            --hidden-import fastapi \
+            --hidden-import typer \
+            --clean \
+            --noconfirm \
+            slides_it/cli.py
 
       - name: Rename artifact
         run: |
@@ -108,18 +136,18 @@ jobs:
             | Platform | Binary |
             |----------|--------|
             | macOS (Apple Silicon) | `slides-it-macos-arm64` |
-            | macOS (Intel)         | `slides-it-macos-x86_64` |
             | Linux (x86_64)        | `slides-it-linux-x86_64` |
 
             Rename the downloaded file to `slides-it`, make it executable (`chmod +x slides-it`),
             and move it somewhere on your `$PATH`.
+
+            > Intel Mac users: the arm64 binary runs via Rosetta 2.
 
             ### Requirements
 
             - [opencode](https://opencode.ai) must be installed (`curl -fsSL https://opencode.ai/install | bash`)
           files: |
             dist/slides-it-macos-arm64
-            dist/slides-it-macos-x86_64
             dist/slides-it-linux-x86_64
           fail_on_unmatched_files: true
           generate_release_notes: false
