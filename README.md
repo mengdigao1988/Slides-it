@@ -1,6 +1,6 @@
 # slides-it
 
-**Slides-it: Your agentic presentation partner**
+**Describe a presentation. Get the HTML. Ship it.**
 
 <p align="center">
   <a href="https://github.com/mengdigao1988/slides-it/releases"><img src="https://img.shields.io/github/v/release/mengdigao1988/slides-it?color=green&label=version" alt="version" /></a>
@@ -50,15 +50,15 @@ slides-it asks you to pick a **workspace folder** — the directory where your s
 
 - Generated slides land in `slides/` inside that folder (e.g. `slides/q1-roadmap.html`)
 - A `.slides-it/` directory is created automatically to store your conversation history
-- Reopen slides-it in the same folder tomorrow — your full chat history is right where you left it
+- Reopen slides-it in the same folder tomorrow — your chat history is right where you left it
 
-Pick any folder. Your code project, a dedicated `presentations/` folder, anywhere.
+Pick any folder. Your code project, a `presentations/` folder, anywhere.
 
 ---
 
 ## Provider Config
 
-slides-it supports all major AI providers. Configure in the **⚙ settings panel** inside the UI, or via environment variable before launching.
+slides-it works with all major AI providers. Configure in the **⚙ settings panel** inside the UI, or set an environment variable before launching.
 
 | Provider | Env var |
 |----------|---------|
@@ -69,46 +69,41 @@ slides-it supports all major AI providers. Configure in the **⚙ settings panel
 | Custom base URL | configure in ⚙ settings |
 
 ```bash
-# Quick start with Anthropic
 export ANTHROPIC_API_KEY=sk-ant-...
 slides-it
 ```
 
-For **custom base URLs** (proxies, local models, any OpenAI-compatible endpoint) — open ⚙ settings, set your provider and base URL there. No env var needed.
+For proxies, local models, or any OpenAI-compatible endpoint — open ⚙ settings and set a custom base URL there. No env var needed.
 
 ---
 
 # What it looks like
 
+You type one sentence. The AI asks a few quick questions — audience, slide count, language. Then it writes the whole deck.
+
 > "8 slides on our Q1 roadmap. Audience is the whole company. Punchy, confident tone."
 
-Thirty seconds later: a polished deck lands in your workspace. Arrow keys to navigate. Swipe on mobile. Share it as a single `.html` file — no app required, no account needed, no export dance.
+Thirty seconds. One `.html` file in your workspace. Arrow keys to navigate, swipe on mobile, share with anyone — no app required, no account needed.
 
-Want changes?
+Made a mistake? Just say so.
 
 > "Make the opening slide more dramatic. Add a slide on pricing. Lighter color scheme."
 
-Done. The whole deck is regenerated with your changes applied. You never touched HTML.
+The whole deck regenerates in place. You never touched HTML.
 
 ---
 
 # Idea
 
-## The problem with GUI tools in the AI era
+Presentation tools haven't changed in 30 years. You still drag boxes. You still fight templates. You still export to PDF to share something that was always just a list of text and images.
 
-You open a slide tool. You pick a template. You spend 45 minutes nudging text boxes, fighting with fonts, and arguing with alignment guides. You end up with something that looks almost — but not quite — like what you had in your head.
+The AI era makes this embarrassing.
 
-GUI slide tools were designed for humans dragging things around a canvas. Their output formats reflect that: opaque, proprietary, built around the assumption that a person is clicking through menus. Asking an AI to work with them is fighting the format.
+An AI agent reads and writes HTML natively. Every layout decision, every animation curve, every color relationship is text — written in one shot, revised with surgical precision. The result is immediately runnable and shareable, no export step required.
 
-## Why HTML
+The opaque binary formats that GUI slide tools produce were designed for humans dragging things around a canvas. Asking an AI to work with them is fighting the format. slides-it skips the GUI entirely.
 
-HTML has always been the superior format for slides. Fluid animations. Pixel-perfect layout. Runs everywhere. No proprietary app required. Nobody used it because nobody wanted to write it by hand.
-
-AI changes that equation completely.
-
-An AI agent doesn't struggle with HTML — it's fluent in it. Every layout decision, every animation curve, every color relationship can be expressed as text, written in one shot, revised with surgical precision. The result is immediately inspectable, runnable, and shareable — no export step, no conversion, no application required to open it.
-
-slides-it skips the GUI entirely. Your words go in. A beautiful file comes out.
+Your words go in. A beautiful file comes out.
 
 Powered by [OpenCode](https://opencode.ai) — an open-source AI coding agent that runs locally and handles everything under the hood.
 
@@ -141,29 +136,31 @@ slides-it template install github:user/repo   # any GitHub repo
 slides-it template install ./my-template      # local directory
 ```
 
-## Reference your files with @
+## A chat input that gets out of your way
 
-Type `@` anywhere in the chat to search and attach files from your workspace. The AI reads them directly — feed in a content outline, a data file, or an existing slide draft.
+The input box is the whole interface. Type naturally — describe what you want, ask for changes, reference files with `@`, or switch templates from the pill selector built right in. No menus, no toolbars, no mode switching.
 
 <p align="center">
-  <img src="img/ez-file-ref.png" width="380" alt="@ file reference popover" />
+  <img src="img/ez-file-ref.png" width="380" alt="@ file reference — search and attach any file from your workspace" />
 </p>
 
-## Live preview panel
+Keyboard shortcuts coming soon.
 
-Every generated deck opens immediately in the right-hand panel. Fully interactive: keyboard navigation, swipe, progress bar. Preview updates the moment the file is rewritten. Download with one click.
+## See it the moment it's done
 
-## Session persistence
+Every generated deck opens immediately in the right-hand preview panel. Fully interactive: keyboard navigation, swipe, progress bar. The preview updates the moment the file is rewritten. Download with one click.
+
+## Pick up where you left off
 
 Your conversation is saved to `.slides-it/` in your workspace automatically. Close the app, come back tomorrow, reopen the same folder — history is right where you left it, and the last preview reloads automatically.
 
 ---
 
-# For Contributors
+# Build your own template
 
-## Make your own template
+Templates are how slides-it gets its personality. The built-in ones are just a starting point — the best themes will come from the community.
 
-A slides-it template is just a directory with two files. Here's how to build one from scratch.
+A template is a directory with two files. Here's how to build and share one.
 
 ### Step 1 — Create the directory
 
@@ -175,7 +172,7 @@ my-theme/
 
 ### Step 2 — Write `TEMPLATE.md`
 
-This is the metadata file. Copy this and fill in your details:
+Metadata. Copy this and fill in your details:
 
 ```markdown
 ---
@@ -189,9 +186,7 @@ preview: https://example.com/preview.png   # optional
 
 ### Step 3 — Write `SKILL.md`
 
-This is the most important file. It's a **visual brief for the AI** — not documentation for humans. The AI reads this before generating every slide deck and follows it precisely.
-
-Structure it like this:
+This is the important file. It's a **visual brief for the AI** — not documentation for humans. The AI reads it before every generation and follows it precisely.
 
 ```markdown
 ## Visual Style — My Theme
@@ -214,31 +209,27 @@ Apply this visual style when generating all slides in this session.
 - Title size: `clamp(2rem, 5vw, 4rem)`
 
 ### Slide Layout
-- Describe padding, max-width, alignment preferences
+- Padding, max-width, alignment preferences
 
 ### Animations
-- Describe entrance style, duration, easing
+- Entrance style, duration, easing
 
 ### Do & Don't
 - **Do** use [specific things]
 - **Don't** use [specific things]
 ```
 
-The more precise and opinionated your `SKILL.md`, the more consistent the output. Look at [`slides_it/templates/default/SKILL.md`](slides_it/templates/default/SKILL.md) and [`slides_it/templates/minimal/SKILL.md`](slides_it/templates/minimal/SKILL.md) for reference.
+The more precise and opinionated your `SKILL.md`, the more consistent the output. See [`slides_it/templates/default/SKILL.md`](slides_it/templates/default/SKILL.md) and [`slides_it/templates/minimal/SKILL.md`](slides_it/templates/minimal/SKILL.md) for real examples.
 
-### Step 4 — Install locally
+### Step 4 — Install and test locally
 
 ```bash
 slides-it template install ./my-theme
 ```
 
-slides-it copies it to `~/.config/slides-it/templates/my-theme/` and activates it.
+Launch slides-it, select your theme from the template pill below the input box, ask for a slide deck. Iterate on `SKILL.md` until the output matches your vision.
 
-### Step 5 — Test it
-
-Launch slides-it, select your theme from the template pill below the input box, then ask for a slide deck. Check that the generated HTML matches your intended aesthetic. Iterate on `SKILL.md` until it's right.
-
-### Step 6 — Share it
+### Step 5 — Share it
 
 Publish your template as a GitHub repo. Anyone can install it with:
 
@@ -246,7 +237,7 @@ Publish your template as a GitHub repo. Anyone can install it with:
 slides-it template install github:yourname/my-theme
 ```
 
-Or submit it to the official registry — open a PR adding your template to [`registry.json`](registry.json).
+Or submit a PR adding your template to [`registry.json`](registry.json) to list it in the official registry.
 
 ---
 
@@ -255,24 +246,23 @@ Or submit it to the official registry — open a PR adding your template to [`re
 Requires [uv](https://docs.astral.sh/uv/) and Node.js 22+.
 
 ```bash
-# Clone
 git clone https://github.com/mengdigao1988/slides-it.git
 cd slides-it
 
 # Backend — FastAPI on port 3000
 uv run python -c "from slides_it.server import run; run(port=3000)"
 
-# Frontend — dev server on port 5173 (proxies /api/* to port 3000)
+# Frontend — dev server on port 5173
 cd frontend && npm install && npm run dev
 
 # Production build
 cd frontend && npm run build
 
-# Build standalone binary
+# Standalone binary
 bash build.sh
 ```
 
-### CLI reference
+### CLI
 
 ```
 slides-it                          launch the web UI
