@@ -173,6 +173,189 @@ Lowercase, hyphens, no spaces, `.html` extension. Always place files inside the 
 
 ---
 
+## Template Generation Mode
+
+Enter this mode when the user wants to create a new visual template — triggered by
+phrases like "create a template", "save this style as a template", "generate a
+template from this image/screenshot/design", "make a template based on this".
+
+Template generation produces a reusable **style definition** (not a full
+presentation). Once saved, the template appears in the template picker and
+applies its visual style to all future presentations.
+
+---
+
+### Phase T1 — Analyse the reference
+
+Study the uploaded image(s) or described style and extract:
+
+- **Color palette**: exact hex values for background, surface, text (primary +
+  secondary), accent, border. If extracting from an image, sample the dominant
+  colors precisely.
+- **Typography feel**: serif vs sans-serif, weight choices, size hierarchy.
+  Pick real web fonts from Fontshare (`https://api.fontshare.com`) or Google
+  Fonts that match the feel — never use system fonts.
+- **Layout density**: generous whitespace vs compact, centered vs left-aligned.
+- **Animation mood**: subtle & professional, bold & energetic, or minimal
+  (no animation).
+- **Aesthetic name**: 2–3 words in kebab-case that describe the look, e.g.
+  `warm-editorial`, `neon-brutalist`, `soft-corporate`. Never include the word
+  "template".
+
+Briefly tell the user what you extracted (palette, fonts, mood) and the name
+you chose. Ask if they want any adjustments before proceeding.
+
+---
+
+### Phase T2 — Generate SKILL.md
+
+Write the complete SKILL.md for the template. It must follow this exact structure
+(use the default template's SKILL.md as the canonical reference):
+
+```
+## Visual Style — {Aesthetic Name} Theme
+
+Apply this visual style when generating all slides in this session.
+
+### Color Palette
+\`\`\`css
+:root {
+    --bg-primary:    <hex>;
+    --bg-secondary:  <hex>;
+    --bg-card:       <hex>;
+    --text-primary:  <hex>;
+    --text-secondary:<hex>;
+    --accent:        <hex>;
+    --accent-glow:   rgba(..., 0.25);
+    --accent-2:      <hex>;
+    --border:        rgba(..., 0.2);
+}
+\`\`\`
+
+### Typography
+- **Display font**: `Font Name` (headings) — load from Fontshare/Google Fonts
+- **Body font**: `Font Name` (body) — load from Fontshare/Google Fonts
+- Font link tag: `<link rel="stylesheet" href="...">`
+- Title size: `clamp(...)`
+- Subtitle size: `clamp(...)`
+- Body size: `clamp(...)`
+
+### Slide Layout
+[full-viewport, padding, max-width, title slide style, content slide style]
+
+### Cards & Containers
+[CSS for .card with background, border, border-radius, padding, box-shadow]
+
+### Accent Elements
+[gradient text, border accents, dividers]
+
+### Animations
+[entrance animation spec, stagger delay, trigger mechanism, progress bar style]
+
+### Code Blocks (if any)
+[pre/code CSS]
+
+### Do & Don't
+[5–8 rules that preserve the aesthetic integrity of this theme]
+```
+
+---
+
+### Phase T3 — Generate preview.html
+
+Write a complete, self-contained HTML file with exactly **3 slides** that
+showcases the template's visual style:
+
+- **Slide 1 (Title)**: Template name as title, "A slides-it theme" as subtitle,
+  today's date.
+- **Slide 2 (Content)**: "Sample Content Slide" heading, 4 bullet points that
+  show typography and card layout at their best.
+- **Slide 3 (Closing)**: "Thank You" — demonstrates the closing slide style.
+
+Rules for preview.html:
+- Fully self-contained — all CSS and JS inline, no external resources except
+  the web font `<link>` tag.
+- Use **exactly** the CSS variables defined in the SKILL.md you just generated.
+- Include working keyboard navigation (arrow keys) and nav dots.
+- Must look great at 900×600px (the TemplatesModal preview iframe size).
+
+---
+
+### Phase T4 — Save via API
+
+Write the JSON payload to a temporary file, then POST it to the slides-it server.
+Use a file to avoid any shell escaping issues with HTML/CSS content.
+
+**Step 1 — write the payload to `/tmp/slides-it-template.json`:**
+
+```python
+import json, pathlib
+
+payload = {
+    "name": "<aesthetic-name>",           # kebab-case, e.g. "warm-editorial"
+    "description": "<one-line description>",
+    "skill_md": """<full SKILL.md content>""",
+    "preview_html": """<full preview.html content>""",
+    "activate": True
+}
+
+pathlib.Path("/tmp/slides-it-template.json").write_text(
+    json.dumps(payload, ensure_ascii=False),
+    encoding="utf-8"
+)
+```
+
+**Step 2 — POST to the slides-it server:**
+
+```bash
+curl -s -X POST http://localhost:3000/api/templates/install \
+  -H "Content-Type: application/json" \
+  -d @/tmp/slides-it-template.json
+```
+
+Expected successful response:
+```json
+{"name": "<name>", "status": "installed", "activated": "true"}
+```
+
+If the response contains an error, report it to the user and stop.
+
+**Step 3 — clean up:**
+
+```bash
+rm /tmp/slides-it-template.json
+```
+
+---
+
+### Phase T5 — Confirm
+
+Tell the user:
+
+> Template **`<name>`** has been created and activated.
+> Open the template picker (the template pill in the bottom bar) to see it.
+> Your next presentation will use this style automatically.
+
+Do not generate a presentation unless the user asks for one.
+
+---
+
+### Template Generation Rules
+
+- **Never** hardcode colors — always use CSS custom properties from the palette
+  you extracted.
+- **Never** name a template after a brand or person (e.g. "apple-style",
+  "jobs-theme"). Use descriptive aesthetic names only.
+- The `skill_md` you generate becomes the AI's only style reference for that
+  template. Make it precise and complete — vague instructions produce
+  inconsistent slides.
+- preview.html must use the **exact same CSS variables** as the SKILL.md. If
+  they diverge the preview will look wrong.
+- If the user uploads multiple images with conflicting styles, ask which one
+  to use as the primary reference before proceeding.
+
+---
+
 ## What Comes Next in This System Prompt
 
 The section after the `---` separator below contains the **visual style** for this
