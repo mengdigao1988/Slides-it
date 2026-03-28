@@ -149,11 +149,10 @@ export default function FileTree({ workspacePath, refreshToken, onFileClick }: F
 
   return (
     <div
-      className="w-56 flex-shrink-0 flex flex-col overflow-hidden relative"
+      className="w-full h-full flex flex-col overflow-hidden relative"
       style={{
         background: isDragOver ? 'var(--bg-hover)' : 'var(--bg-sidebar)',
-        borderRight: `1px solid ${isDragOver ? 'var(--btn-send)' : 'var(--border)'}`,
-        transition: 'background 0.15s, border-color 0.15s',
+        transition: 'background 0.15s',
       }}
       onDragEnter={onDragEnter}
       onDragLeave={onDragLeave}

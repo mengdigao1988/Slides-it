@@ -5,7 +5,9 @@ import PreviewPanel from './components/PreviewPanel'
 import FileTree from './components/FileTree'
 import WorkspaceSelector from './components/WorkspaceSelector'
 import SettingsModal from './components/SettingsModal'
+import SessionPanel from './components/SessionPanel'
 import { getTemplateSkill, getStatus } from './lib/slides-server-api'
+import type { Todo, FileDiff } from './lib/opencode-api'
 
 type Page = 'workspace' | 'chat' | 'loading'
 
@@ -18,6 +20,8 @@ export default function App() {
   const [previewFile, setPreviewFile] = useState<string | null>(null)
   const [fileTreeRefreshToken, setFileTreeRefreshToken] = useState(0)
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [todos, setTodos] = useState<Todo[]>([])
+  const [diffs, setDiffs] = useState<FileDiff[]>([])
 
   // On mount: check if the server is already running with an active workspace.
   // If so, skip the workspace selector and go directly to chat.
@@ -84,20 +88,26 @@ export default function App() {
         onSettingsOpen={() => setSettingsOpen(true)}
       />
       <div className="flex-1 flex min-h-0">
-        <FileTree
-          workspacePath={workspacePath}
-          refreshToken={fileTreeRefreshToken}
-          onFileClick={(path) => {
-            if (path.endsWith('.html')) {
-              // opencode /file/content only accepts relative paths from its cwd;
-              // strip the workspace prefix to convert absolute → relative
-              const rel = path.startsWith(workspacePath + '/')
-                ? path.slice(workspacePath.length + 1)
-                : path
-              setPreviewFile(rel)
-            }
-          }}
-        />
+        <div
+          className="flex flex-col min-h-0 shrink-0"
+          style={{ width: '224px', borderRight: '1px solid var(--border)' }}
+        >
+          <div className="flex-1 min-h-0 overflow-hidden">
+            <FileTree
+              workspacePath={workspacePath}
+              refreshToken={fileTreeRefreshToken}
+              onFileClick={(path) => {
+                if (path.endsWith('.html')) {
+                  const rel = path.startsWith(workspacePath + '/')
+                    ? path.slice(workspacePath.length + 1)
+                    : path
+                  setPreviewFile(rel)
+                }
+              }}
+            />
+          </div>
+          <SessionPanel todos={todos} diffs={diffs} />
+        </div>
         <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
           <ChatPanel
             workspacePath={workspacePath}
@@ -108,6 +118,8 @@ export default function App() {
               setPreviewFile(path)
               setFileTreeRefreshToken((t) => t + 1)
             }}
+            onTodosChange={setTodos}
+            onDiffsChange={setDiffs}
           />
         </div>
         <PreviewPanel htmlFile={previewFile} />

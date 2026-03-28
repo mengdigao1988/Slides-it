@@ -16,7 +16,11 @@ import {
   fileToFilePart,
   isAttachableAsFile,
   findFiles,
+  getTodos,
+  getSessionDiff,
   type FilePart,
+  type Todo,
+  type FileDiff,
 } from '../lib/opencode-api'
 import {
   enqueueDelta,
@@ -44,6 +48,8 @@ interface ChatPanelProps {
   activeTemplate?: string
   onTemplateChange?: (name: string) => Promise<string>
   onHtmlGenerated: (path: string) => void
+  onTodosChange?: (todos: Todo[]) => void
+  onDiffsChange?: (diffs: FileDiff[]) => void
 }
 
 interface AtReference {
@@ -51,7 +57,7 @@ interface AtReference {
   name: string
 }
 
-export default function ChatPanel({ workspacePath, activeSkill, activeTemplate, onTemplateChange, onHtmlGenerated }: ChatPanelProps) {
+export default function ChatPanel({ workspacePath, activeSkill, activeTemplate, onTemplateChange, onHtmlGenerated, onTodosChange, onDiffsChange }: ChatPanelProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [sending, setSending] = useState(false)
   const [input, setInput] = useState('')
@@ -229,6 +235,10 @@ export default function ChatPanel({ workspacePath, activeSkill, activeTemplate, 
         setSessionId(s.id)
         sessionIdRef.current = s.id
 
+        // Load initial todos and diffs for this session
+        getTodos(s.id).then((t) => onTodosChange?.(t)).catch(() => {})
+        getSessionDiff(s.id).then((d) => onDiffsChange?.(d)).catch(() => {})
+
         if (savedMessages.length > 0) {
           setMessages(savedMessages)
           messagesRef.current = savedMessages
@@ -303,6 +313,16 @@ export default function ChatPanel({ workspacePath, activeSkill, activeTemplate, 
       runningToolRef.current = ''
       setRunningTool('')
       setSending(false)
+    }
+
+    if (type === 'todo.updated') {
+      const todos = (properties.todos ?? []) as Todo[]
+      onTodosChange?.(todos)
+    }
+
+    if (type === 'session.diff') {
+      const diff = (properties.diff ?? []) as FileDiff[]
+      onDiffsChange?.(diff)
     }
 
     if (type === 'message.updated') {
@@ -575,6 +595,8 @@ export default function ChatPanel({ workspacePath, activeSkill, activeTemplate, 
     setRunningTool('')
     setAtReferences([])
     setAtQuery(null)
+    onTodosChange?.([])
+    onDiffsChange?.([])
     const s = await createSession('slides-it').catch(() => null)
     if (s) {
       setSessionId(s.id)

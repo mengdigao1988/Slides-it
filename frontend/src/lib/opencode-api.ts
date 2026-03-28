@@ -181,6 +181,27 @@ export function connectEventStream(): EventSource {
   return new EventSource(`${BASE}/event`)
 }
 
+export interface Todo {
+  id: string
+  content: string
+  status: 'pending' | 'in_progress' | 'completed' | 'cancelled'
+  priority: 'high' | 'medium' | 'low'
+}
+
+export interface FileDiff {
+  file: string
+  additions: number
+  deletions: number
+}
+
+export function getTodos(sessionId: string): Promise<Todo[]> {
+  return request<Todo[]>(`/session/${sessionId}/todo`)
+}
+
+export function getSessionDiff(sessionId: string): Promise<FileDiff[]> {
+  return request<FileDiff[]>(`/session/${sessionId}/diff`)
+}
+
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
