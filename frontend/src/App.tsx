@@ -62,6 +62,12 @@ export default function App() {
     }
   }
 
+  function toRelative(absPath: string): string {
+    return absPath.startsWith(workspacePath + '/')
+      ? absPath.slice(workspacePath.length + 1)
+      : absPath
+  }
+
   if (page === 'loading') {
     return (
       <div
@@ -99,9 +105,7 @@ export default function App() {
               workspacePath={workspacePath}
               refreshToken={fileTreeRefreshToken}
               onFileClick={(path) => {
-                if (path.endsWith('.html')) {
-                  setPreviewFile(path)
-                }
+                if (path.endsWith('.html')) setPreviewFile(toRelative(path))
               }}
             />
           </div>
@@ -114,8 +118,7 @@ export default function App() {
             activeTemplate={activeTemplate}
             onTemplateChange={handleTemplateChange}
             onHtmlGenerated={(path) => {
-              // path is always absolute — pass directly to PreviewPanel
-              setPreviewFile(path)
+              setPreviewFile(toRelative(path))
               setFileTreeRefreshToken((t) => t + 1)
             }}
             onTodosChange={setTodos}
