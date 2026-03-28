@@ -13,6 +13,7 @@ from importlib.metadata import version as _pkg_version
 import typer
 from typing import Annotated
 
+from slides_it import __version__ as _BUNDLED_VERSION
 from slides_it.templates import TemplateManager
 
 # ---------------------------------------------------------------------------
@@ -108,7 +109,7 @@ def _version_callback(value: bool) -> None:
         try:
             ver = _pkg_version("slides-it")
         except Exception:
-            ver = "unknown"
+            ver = _BUNDLED_VERSION
         typer.echo(f"slides-it {ver}")
         raise typer.Exit()
 
@@ -181,11 +182,6 @@ def _launch(
     finally:
         _cleanup()
         typer.echo("Goodbye.")
-
-
-def main() -> None:
-    """Package entry point (called by `slides-it` command)."""
-    app()
 
 
 # ---------------------------------------------------------------------------
@@ -361,3 +357,48 @@ def stop() -> None:
 
     if not stopped_any:
         typer.echo("No slides-it processes found running.")
+
+
+# ---------------------------------------------------------------------------
+# slides-it upgrade
+# ---------------------------------------------------------------------------
+
+@app.command("upgrade")
+def upgrade() -> None:
+    """Upgrade slides-it to the latest release."""
+    try:
+        import httpx
+        resp = httpx.get(
+            "https://api.github.com/repos/mengdigao1988/slides-it/releases/latest",
+            follow_redirects=True,
+            timeout=10,
+        )
+        resp.raise_for_status()
+        latest = resp.json().get("tag_name", "").lstrip("v")
+    except Exception as e:
+        typer.echo(f"Error: could not fetch latest release — {e}", err=True)
+        raise typer.Exit(1)
+
+    current = _BUNDLED_VERSION
+    if latest == current:
+        typer.echo(f"Already up to date (slides-it {current}).")
+        return
+
+    typer.echo(f"Upgrading slides-it {current} → {latest} ...")
+    result = subprocess.run(
+        "curl -fsSL https://raw.githubusercontent.com/mengdigao1988/slides-it/main/install.sh | bash",
+        shell=True,
+    )
+    if result.returncode != 0:
+        typer.echo("Upgrade failed.", err=True)
+        raise typer.Exit(1)
+    typer.echo(f"slides-it {latest} installed. Restart your terminal if needed.")
+
+
+def main() -> None:
+    """Package entry point (called by `slides-it` command)."""
+    app()
+
+
+if __name__ == "__main__":
+    main()

@@ -97,17 +97,11 @@ For proxies, local models, or any OpenAI-compatible endpoint — open ⚙ settin
   <img src="img/title-page.png" width="780" alt="slides-it — chat panel with AI Q&A on the left, generated slide preview on the right" />
 </p>
 
-You type one sentence. The AI asks a few quick questions — audience, slide count, language. Then it writes the whole deck.
+You describe what you need. The AI figures out the rest — layout, hierarchy, color, animation. What used to take an hour of dragging boxes takes one conversation.
 
-> "8 slides on our Q1 roadmap. Audience is the whole company. Punchy, confident tone."
+And when you want something different, you just say so. The whole deck updates. No undo history, no layer panels, no fighting the template.
 
-Thirty seconds. One `.html` file in your workspace. Arrow keys to navigate, swipe on mobile, share with anyone — no app required, no account needed.
-
-Made a mistake? Just say so.
-
-> "Make the opening slide more dramatic. Add a slide on pricing. Lighter color scheme."
-
-The whole deck regenerates in place. You never touched HTML.
+The output isn't a draft. It's a finished file you can open in any browser, share with anyone, and present from anywhere.
 
 ---
 
