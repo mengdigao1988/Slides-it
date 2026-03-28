@@ -85,7 +85,7 @@ export default function ChatPanel({ workspacePath, activeSkill, activeTemplate, 
   const [templatesModalOpen, setTemplatesModalOpen] = useState(false)
   const templateDropdownRef = useRef<HTMLDivElement>(null)
 
-  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const messagesContainerRef = useRef<HTMLDivElement>(null)
   const eventSourceRef = useRef<EventSource | null>(null)
   const msgMapRef = useRef<Map<string, string>>(new Map())
   const partMapRef = useRef<Map<string, string>>(new Map())
@@ -605,7 +605,8 @@ export default function ChatPanel({ workspacePath, activeSkill, activeTemplate, 
   }
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    const el = messagesContainerRef.current
+    if (el) el.scrollTop = el.scrollHeight
   }, [messages])
 
   function resize() {
@@ -1003,7 +1004,7 @@ export default function ChatPanel({ workspacePath, activeSkill, activeTemplate, 
             </button>
           </div>
 
-          <div className="flex-1 overflow-y-auto px-4 py-5 space-y-1">
+          <div ref={messagesContainerRef} className="flex-1 overflow-y-auto px-4 py-5 space-y-1">
             {messages.map((msg) => (
               <MessageBubble
                 key={msg.id}
@@ -1013,7 +1014,6 @@ export default function ChatPanel({ workspacePath, activeSkill, activeTemplate, 
                 onQuestionReject={handleQuestionReject}
               />
             ))}
-            <div ref={messagesEndRef} />
           </div>
 
           {chatError && (
