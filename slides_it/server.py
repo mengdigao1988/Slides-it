@@ -756,15 +756,18 @@ def _is_opencode_healthy() -> bool:
 
 def _read_opencode_jsonc(workspace: str) -> dict:
     """
-    Read and parse <workspace>/opencode.jsonc, stripping // line comments.
+    Read and parse the slides-it provider config from the workspace.
 
-    Returns an empty dict if the file does not exist or cannot be parsed.
+    Reads opencode.json first (the file opencode actually loads as project config).
+    Falls back to opencode.jsonc for users who had an older slides-it version.
+
+    Returns an empty dict if no file exists or cannot be parsed.
     """
     import re
-    cfg_path = pathlib.Path(workspace) / "opencode.jsonc"
+    # opencode loads opencode.json as the project config — use that as primary
+    cfg_path = pathlib.Path(workspace) / "opencode.json"
     if not cfg_path.exists():
-        # Also try .json fallback
-        cfg_path = pathlib.Path(workspace) / "opencode.json"
+        cfg_path = pathlib.Path(workspace) / "opencode.jsonc"
     if not cfg_path.exists():
         return {}
     try:
@@ -787,27 +790,17 @@ def _write_opencode_jsonc(
     custom_model: str,
 ) -> None:
     """
-    Write provider config into <workspace>/opencode.jsonc.
+    Write provider config into <workspace>/opencode.json.
 
-    Reads the existing file (preserving all other keys), then:
-    - Removes any previously written provider blocks (those with a "slides-it" marker
-      or simply the one matching provider_id).
-    - If api_key is non-empty, writes a fresh provider block for provider_id.
-    - If api_key is empty, removes the provider block so opencode uses free tier.
-
-    Native providers (anthropic, openai, openrouter, deepseek) only need
-    options.apiKey (and optionally options.baseURL).
-
-    Custom / OpenAI-compatible providers also need npm + name fields so opencode
-    can load the correct SDK adapter.
-
-    Writes valid JSON (no comments) so the file remains machine-writable while
-    still being usable by opencode (which accepts both .json and .jsonc).
+    Uses opencode.json (not .jsonc) because that is the filename opencode
+    recognises as the project-level config. Writing to .jsonc would be silently
+    ignored by opencode when a .json file is also present.
     """
     import re
-    cfg_path = pathlib.Path(workspace) / "opencode.jsonc"
+    # Write to opencode.json — the file opencode actually loads as project config
+    cfg_path = pathlib.Path(workspace) / "opencode.json"
 
-    # Parse existing file (comment-stripping)
+    # Parse existing file (comment-stripping for safety)
     cfg: dict = {}
     if cfg_path.exists():
         try:
@@ -824,9 +817,7 @@ def _write_opencode_jsonc(
 
     provider_section: dict = cfg.get("provider", {})
 
-    # Remove old provider blocks written by slides-it (clean slate on provider change)
-    # We remove any provider that isn't the current one, if it was slides-it managed.
-    # Simple heuristic: if there's exactly one provider key that differs from provider_id, remove it.
+    # Remove stale provider blocks from previous provider (clean slate on switch)
     if provider_id and provider_section:
         stale = [k for k in list(provider_section.keys()) if k != provider_id]
         for k in stale:
