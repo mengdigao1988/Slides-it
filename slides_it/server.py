@@ -359,6 +359,7 @@ def get_models() -> dict[str, object]:
         result = subprocess.run(
             ["opencode", "models"],
             capture_output=True, text=True, timeout=10,
+            cwd=_workspace_dir if _workspace_dir else None,
         )
         models = [line.strip() for line in result.stdout.splitlines() if line.strip()]
     except Exception:
