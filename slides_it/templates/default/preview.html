@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aurora Theme — Preview</title>
+<link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&f[]=satoshi@400,500&display=swap">
+<script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.js"></script>
+<style>
+:root {
+  --bg-primary:    #030712;
+  --bg-secondary:  #0f172a;
+  --bg-card:       rgba(30, 41, 59, 0.6);
+  --text-primary:  #f8fafc;
+  --text-secondary:#94a3b8;
+  --accent:        #22d3ee;
+  --accent-2:     #a78bfa;
+  --accent-3:     #34d399;
+  --border:        rgba(34, 211, 238, 0.15);
+  --glow:          rgba(34, 211, 238, 0.25);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  scroll-snap-type: y mandatory;
+  overflow-y: scroll;
+  height: 100%;
+}
+
+/* Background Layers */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse 120% 80% at 50% 0%, #1e1b4b 0%, #030712 60%);
+  z-index: -3;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  opacity: 0.03;
+  z-index: -2;
+  pointer-events: none;
+}
+
+.aurora-1, .aurora-2, .aurora-3 {
+  position: fixed;
+  width: 150%;
+  height: 60%;
+  filter: blur(80px);
+  opacity: 0.6;
+  animation: aurora-drift 25s ease-in-out infinite alternate;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.aurora-1 {
+  top: -10%;
+  left: -25%;
+  background: linear-gradient(135deg, #22d3ee 0%, transparent 60%);
+  animation-duration: 28s;
+}
+
+.aurora-2 {
+  top: 20%;
+  right: -30%;
+  background: linear-gradient(225deg, #a78bfa 0%, transparent 50%);
+  animation-duration: 35s;
+  animation-delay: -10s;
+}
+
+.aurora-3 {
+  top: 40%;
+  left: 10%;
+  background: linear-gradient(90deg, #34d399 0%, transparent 40%);
+  animation-duration: 22s;
+  animation-delay: -5s;
+  opacity: 0.4;
+}
+
+@keyframes aurora-drift {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(30px, -20px) scale(1.1); }
+  100% { transform: translate(-20px, 20px) scale(0.95); }
+}
+
+.stars {
+  position: fixed;
+  inset: 0;
+  background-image: radial-gradient(1px 1px at 20% 30%, white 50%, transparent),
+                    radial-gradient(1px 1px at 40% 70%, white 50%, transparent),
+                    radial-gradient(1.5px 1.5px at 60% 20%, white 50%, transparent),
+                    radial-gradient(1px 1px at 80% 60%, white 50%, transparent);
+  opacity: 0.7;
+  z-index: -1;
+  pointer-events: none;
+}
+
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: 'Satoshi', ui-sans-serif, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  height: 100%;
+}
+
+/* Progress bar */
+.progress-bar {
+  position: fixed;
+  top: 0; left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  width: 0%;
+  z-index: 100;
+  transition: width 0.2s ease;
+  box-shadow: 0 0 8px var(--glow);
+}
+
+/* Nav dots */
+.nav-dots {
+  position: fixed;
+  right: clamp(1rem, 2vw, 1.5rem);
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 100;
+}
+
+.nav-dots button {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  border: 1px solid rgba(34, 211, 238, 0.4);
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.nav-dots button.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  box-shadow: 0 0 6px var(--glow);
+}
+
+/* Slides */
+.slide {
+  height: 100vh;
+  height: 100dvh;
+  scroll-snap-align: start;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(2rem, 5vw, 5rem);
+  background: transparent;
+}
+
+.slide-inner {
+  max-width: 960px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* Reveal */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.reveal:nth-child(1) { transition-delay: 0s; }
+.reveal:nth-child(2) { transition-delay: 0.1s; }
+.reveal:nth-child(3) { transition-delay: 0.2s; }
+.reveal:nth-child(4) { transition-delay: 0.3s; }
+.reveal:nth-child(5) { transition-delay: 0.4s; }
+.reveal:nth-child(6) { transition-delay: 0.5s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    transition: opacity 0.4s ease;
+    transform: none !important;
+  }
+  .aurora-1, .aurora-2, .aurora-3 {
+    animation: none;
+    opacity: 0.3;
+  }
+}
+
+/* Typography */
+h1 {
+  font-family: 'Clash Display', ui-sans-serif, sans-serif;
+  font-size: clamp(2.5rem, 6vw, 5rem);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  text-shadow: 0 0 40px rgba(34, 211, 238, 0.3);
+}
+
+h2 {
+  font-family: 'Clash Display', ui-sans-serif, sans-serif;
+  font-size: clamp(1.6rem, 3vw, 2.4rem);
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--text-primary);
+}
+
+.subtitle {
+  font-size: clamp(1rem, 2vw, 1.5rem);
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.label {
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-weight: 500;
+}
+
+/* Gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Accent line */
+.accent-line {
+  width: 48px;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  border-radius: 2px;
+  margin: 1.25rem 0;
+}
+
+/* Glass cards */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.card {
+  background: var(--bg-card);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: clamp(1.25rem, 2vw, 2rem);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4), 0 0 0 1px var(--glow);
+  border-color: var(--glow);
+}
+
+.card-icon {
+  width: 2rem;
+  height: 2rem;
+  color: var(--accent);
+  margin-bottom: 0.75rem;
+  transition: transform 0.2s ease;
+}
+
+.card:hover .card-icon {
+  transform: scale(1.15);
+}
+
+.card-label {
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.card-title {
+  font-family: 'Clash Display', sans-serif;
+  font-size: clamp(0.95rem, 1.6vw, 1.2rem);
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.card-body {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+/* Bullet list */
+.bullet-list {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+.bullet-list li {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  font-size: clamp(0.9rem, 1.3vw, 1.05rem);
+  color: var(--text-secondary);
+  line-height: 1.6;
+  padding: 0.875rem 1rem;
+  background: var(--bg-card);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.bullet-list li::before {
+  content: "›";
+  color: var(--accent);
+  font-size: 1.1em;
+  flex-shrink: 0;
+  margin-top: 0.05em;
+}
+
+/* Stat row */
+.stat-row {
+  display: flex;
+  gap: 3rem;
+  align-items: flex-end;
+}
+
+.stat-number {
+  font-family: 'Clash Display', sans-serif;
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.stat-desc {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-top: 0.25rem;
+}
+
+/* Callout */
+.callout {
+  border-left: 3px solid var(--accent);
+  padding: 1rem 1.25rem;
+  background: rgba(34, 211, 238, 0.06);
+  border-radius: 0 8px 8px 0;
+}
+
+.callout p {
+  font-size: clamp(1.1rem, 2vw, 1.5rem);
+  color: var(--text-primary);
+  font-style: italic;
+  line-height: 1.5;
+  margin-bottom: 0.5rem;
+  font-family: 'Satoshi', sans-serif;
+}
+
+.callout cite {
+  font-size: 0.75rem;
+  color: var(--accent);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-style: normal;
+}
+</style>
+</head>
+<body>
+
+<!-- Aurora background layers -->
+<div class="aurora-1"></div>
+<div class="aurora-2"></div>
+<div class="aurora-3"></div>
+<div class="stars"></div>
+
+<div class="progress-bar" id="progressBar"></div>
+<nav class="nav-dots" id="navDots" aria-label="Slide navigation"></nav>
+
+<!-- Slide 1: Title -->
+<section class="slide" data-index="0">
+  <div class="slide-inner">
+    <p class="label reveal">slides-it · aurora theme</p>
+    <div class="accent-line reveal"></div>
+    <h1 class="reveal">Build slides that<br><span class="gradient-text">actually impress</span></h1>
+    <div class="accent-line reveal" style="background: linear-gradient(90deg, var(--accent-2), transparent)"></div>
+    <p class="subtitle reveal">A stunning dark theme with animated aurora backgrounds — engineered for technical presentations, product demos, and conference talks.</p>
+    <p class="reveal" style="margin-top:2rem; font-size:0.8rem; color: var(--text-secondary)">2026 — slides-it</p>
+  </div>
+</section>
+
+<!-- Slide 2: Three columns with icons -->
+<section class="slide" data-index="1">
+  <div class="slide-inner">
+    <p class="label reveal">Core principles</p>
+    <h2 class="reveal" style="margin: 0.5rem 0 1.5rem">Three pillars of great slides</h2>
+    <div class="card-grid reveal">
+      <div class="card">
+        <i data-lucide="sparkles" class="card-icon"></i>
+        <p class="card-label">Visual</p>
+        <p class="card-title">Aurora Depth</p>
+        <p class="card-body">Layered backgrounds create atmosphere without overwhelming content.</p>
+      </div>
+      <div class="card">
+        <i data-lucide="wand-2" class="card-icon"></i>
+        <p class="card-label">Motion</p>
+        <p class="card-title">Glassmorphism</p>
+        <p class="card-body">Translucent cards with blur effects add modern depth.</p>
+      </div>
+      <div class="card">
+        <i data-lucide="type" class="card-icon"></i>
+        <p class="card-label">Typography</p>
+        <p class="card-title">Clash + Satoshi</p>
+        <p class="card-body">Display headings pair with humanist body text for confident readability.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 3: Bullets -->
+<section class="slide" data-index="2">
+  <div class="slide-inner">
+    <p class="label reveal">What's included</p>
+    <h2 class="reveal" style="margin: 0.5rem 0 1.5rem">Everything you need,<br>nothing you don't</h2>
+    <ul class="bullet-list">
+      <li class="reveal">Animated aurora background with 3 drifting light layers</li>
+      <li class="reveal">Glassmorphism cards with backdrop-filter blur effect</li>
+      <li class="reveal">Keyboard, touch, and scroll navigation built-in</li>
+      <li class="reveal">IntersectionObserver-triggered entrance animations</li>
+      <li class="reveal">Fluid <code style="font-family:monospace;font-size:0.85em;background:rgba(34,211,238,0.12);padding:0.1em 0.4em;border-radius:4px;color:var(--accent-2)">clamp()</code> sizing scales from laptop to 4K display</li>
+    </ul>
+  </div>
+</section>
+
+<!-- Slide 4: Stats -->
+<section class="slide" data-index="3">
+  <div class="slide-inner">
+    <p class="label reveal">By the numbers</p>
+    <div class="accent-line reveal"></div>
+    <div class="stat-row reveal">
+      <div>
+        <div class="stat-number gradient-text">100%</div>
+        <div class="stat-desc">Self-contained HTML</div>
+      </div>
+      <div>
+        <div class="stat-number gradient-text">0</div>
+        <div class="stat-desc">Dependencies</div>
+      </div>
+      <div>
+        <div class="stat-number gradient-text">∞</div>
+        <div class="stat-desc">Topics it suits</div>
+      </div>
+    </div>
+    <div class="accent-line reveal" style="margin-top:2rem;background:linear-gradient(90deg,var(--accent-2),transparent)"></div>
+    <p class="reveal" style="font-size:clamp(0.9rem,1.3vw,1rem);color:var(--text-secondary);line-height:1.7">One HTML file. No build tools, no CDN, no runtime. Open it anywhere.</p>
+  </div>
+</section>
+
+<!-- Slide 5: Closing quote -->
+<section class="slide" data-index="4">
+  <div class="slide-inner">
+    <div class="callout reveal">
+      <p>"The presentation is the argument. Make it undeniable."</p>
+      <cite>slides-it aurora theme</cite>
+    </div>
+    <div class="accent-line reveal" style="margin-top:2.5rem"></div>
+    <p class="label reveal">generated with slides-it + claude</p>
+  </div>
+</section>
+
+<script>
+// Initialize icons
+if (typeof lucide !== 'undefined') {
+  lucide.createIcons();
+}
+
+class SlidePresentation {
+  constructor() {
+    this.slides = document.querySelectorAll('.slide');
+    this.currentSlide = 0;
+    this.setupProgressBar();
+    this.setupNavDots();
+    this.setupIntersectionObserver();
+    this.setupKeyboardNav();
+    this.setupTouchNav();
+    this.setupMouseWheel();
+  }
+
+  setupProgressBar() {
+    const bar = document.getElementById('progressBar');
+    const update = () => {
+      const scrolled = window.scrollY;
+      const total = document.body.scrollHeight - window.innerHeight;
+      bar.style.width = total > 0 ? (scrolled / total * 100) + '%' : '0%';
+    };
+    window.addEventListener('scroll', update, { passive: true });
+    update();
+  }
+
+  setupNavDots() {
+    const nav = document.getElementById('navDots');
+    this.slides.forEach((_, i) => {
+      const btn = document.createElement('button');
+      btn.setAttribute('aria-label', `Go to slide ${i + 1}`);
+      if (i === 0) btn.classList.add('active');
+      btn.addEventListener('click', () => this.goTo(i));
+      nav.appendChild(btn);
+    });
+    this.dots = nav.querySelectorAll('button');
+
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          const idx = parseInt(e.target.dataset.index);
+          this.dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+          this.currentSlide = idx;
+        }
+      });
+    }, { threshold: 0.5 });
+    this.slides.forEach(s => obs.observe(s));
+  }
+
+  setupIntersectionObserver() {
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
+        }
+      });
+    }, { threshold: 0.15 });
+    this.slides.forEach(s => obs.observe(s));
+  }
+
+  setupKeyboardNav() {
+    document.addEventListener('keydown', e => {
+      if (['ArrowDown','ArrowRight',' ','PageDown'].includes(e.key)) {
+        e.preventDefault(); this.goTo(this.currentSlide + 1);
+      } else if (['ArrowUp','ArrowLeft','PageUp'].includes(e.key)) {
+        e.preventDefault(); this.goTo(this.currentSlide - 1);
+      }
+    });
+  }
+
+  setupTouchNav() {
+    let startY = 0;
+    document.addEventListener('touchstart', e => { startY = e.touches[0].clientY; }, { passive: true });
+    document.addEventListener('touchend', e => {
+      const dy = startY - e.changedTouches[0].clientY;
+      if (Math.abs(dy) > 40) this.goTo(this.currentSlide + (dy > 0 ? 1 : -1));
+    }, { passive: true });
+  }
+
+  setupMouseWheel() {
+    let last = 0;
+    document.addEventListener('wheel', e => {
+      const now = Date.now();
+      if (now - last < 800) return;
+      last = now;
+      this.goTo(this.currentSlide + (e.deltaY > 0 ? 1 : -1));
+    }, { passive: true });
+  }
+
+  goTo(idx) {
+    const clamped = Math.max(0, Math.min(this.slides.length - 1, idx));
+    this.slides[clamped].scrollIntoView({ behavior: 'smooth' });
+    this.currentSlide = clamped;
+  }
+}
+
+new SlidePresentation();
+</script>
+</body>
+</html>

@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Minimal Theme — Preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.js"></script>
+<style>
+:root {
+  --bg-primary:    #FAF9F6;
+  --bg-secondary:  #F0EEE8;
+  --bg-card:       #FFFFFF;
+  --text-primary:  #1A1916;
+  --text-secondary:#6B6560;
+  --text-muted:    #A09890;
+  --accent:        #1A1916;
+  --accent-2:      #6B6560;
+  --border:        #E2DED5;
+  --border-strong: #C9C4B8;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  scroll-snap-type: y mandatory;
+  overflow-y: scroll;
+  height: 100%;
+}
+
+/* Background Layers */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(180deg, #FAF9F6 0%, #F5F3EE 50%, #FAF9F6 100%);
+  z-index: -3;
+}
+
+.geo-shape-1, .geo-shape-2, .geo-shape-3 {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.35;
+  z-index: -2;
+  pointer-events: none;
+}
+
+.geo-shape-1 {
+  width: 600px;
+  height: 600px;
+  background: #FFB347;
+  top: -200px;
+  right: -100px;
+}
+
+.geo-shape-2 {
+  width: 400px;
+  height: 400px;
+  background: #FFA633;
+  bottom: -100px;
+  left: -100px;
+}
+
+.geo-shape-3 {
+  width: 300px;
+  height: 300px;
+  background: #EE9526;
+  top: 50%;
+  left: 30%;
+  opacity: 0.25;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 3px,
+    rgba(0, 0, 0, 0.008) 3px,
+    rgba(0, 0, 0, 0.008) 6px
+  );
+  z-index: -1;
+  pointer-events: none;
+}
+
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: 'DM Sans', ui-sans-serif, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  height: 100%;
+}
+
+/* Progress bar */
+.progress-bar {
+  position: fixed;
+  top: 0; left: 0;
+  height: 2px;
+  background: var(--border-strong);
+  width: 0%;
+  z-index: 100;
+  transition: width 0.2s ease;
+}
+
+/* Nav dots */
+.nav-dots {
+  position: fixed;
+  right: clamp(1rem, 2vw, 1.5rem);
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 100;
+}
+
+.nav-dots button {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  border: 1px solid var(--border-strong);
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.2s;
+}
+
+.nav-dots button.active {
+  background: var(--text-primary);
+  border-color: var(--text-primary);
+}
+
+/* Slides */
+.slide {
+  height: 100vh;
+  height: 100dvh;
+  scroll-snap-align: start;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(2.5rem, 6vw, 6rem);
+}
+
+.slide-inner {
+  max-width: 880px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* Reveal animation - subtle opacity only */
+.reveal {
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.reveal.visible {
+  opacity: 1;
+}
+
+.reveal:nth-child(1) { transition-delay: 0s; }
+.reveal:nth-child(2) { transition-delay: 0.06s; }
+.reveal:nth-child(3) { transition-delay: 0.12s; }
+.reveal:nth-child(4) { transition-delay: 0.18s; }
+.reveal:nth-child(5) { transition-delay: 0.24s; }
+.reveal:nth-child(6) { transition-delay: 0.30s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    transition: opacity 0.3s ease;
+    opacity: 1;
+  }
+}
+
+/* Typography */
+.label {
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 400;
+}
+
+h1 {
+  font-family: 'DM Serif Display', serif;
+  font-size: clamp(2.2rem, 5vw, 4rem);
+  font-weight: 400;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+
+h2 {
+  font-family: 'DM Serif Display', serif;
+  font-size: clamp(1.6rem, 3vw, 2.6rem);
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+}
+
+.subtitle {
+  font-size: clamp(1rem, 1.8vw, 1.35rem);
+  color: var(--text-secondary);
+  font-weight: 300;
+  line-height: 1.6;
+}
+
+.body-text {
+  font-size: clamp(0.85rem, 1.2vw, 1rem);
+  color: var(--text-secondary);
+  line-height: 1.75;
+}
+
+.divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 1.5rem 0;
+}
+
+.heading-rule {
+  border: none;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Card grid */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: clamp(1rem, 2vw, 1.5rem);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.card-icon {
+  width: 1.75rem;
+  height: 1.75rem;
+  color: var(--accent-2);
+  margin-bottom: 0.5rem;
+  transition: transform 0.2s ease;
+}
+
+.card:hover .card-icon {
+  transform: scale(1.05);
+}
+
+.card-label {
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+}
+
+.card-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: clamp(1rem, 1.8vw, 1.4rem);
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.card-body {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+/* Bullet list */
+.bullet-list {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.bullet-list li {
+  display: flex;
+  gap: 0.75rem;
+  font-size: clamp(0.9rem, 1.3vw, 1.05rem);
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.bullet-list li::before {
+  content: "—";
+  color: var(--border-strong);
+  flex-shrink: 0;
+  font-family: 'DM Serif Display', serif;
+}
+
+/* Big stat */
+.stat-row {
+  display: flex;
+  gap: 3rem;
+  align-items: flex-end;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.stat-number {
+  font-family: 'DM Serif Display', serif;
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-weight: 400;
+  color: var(--text-primary);
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.stat-desc {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* Quote */
+.blockquote {
+  border-left: 2px solid var(--border-strong);
+  padding-left: 1.5rem;
+}
+
+.blockquote p {
+  font-family: 'DM Serif Display', serif;
+  font-size: clamp(1.3rem, 2.5vw, 2rem);
+  font-style: italic;
+  color: var(--text-primary);
+  line-height: 1.4;
+  margin-bottom: 1rem;
+}
+
+.blockquote cite {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  font-style: normal;
+}
+</style>
+</head>
+<body>
+
+<!-- Geometric background layers -->
+<div class="geo-shape-1"></div>
+<div class="geo-shape-2"></div>
+<div class="geo-shape-3"></div>
+
+<div class="progress-bar" id="progressBar"></div>
+<nav class="nav-dots" id="navDots" aria-label="Slide navigation"></nav>
+
+<!-- Slide 1: Title -->
+<section class="slide" data-index="0">
+  <div class="slide-inner">
+    <p class="label reveal">slides-it · minimal theme</p>
+    <hr class="divider reveal">
+    <h1 class="reveal">Ideas deserve<br><em>clear presentation</em></h1>
+    <hr class="divider reveal">
+    <p class="subtitle reveal">A warm, typographic theme with subtle geometric depth. No gradients. No glow. Just words on paper.</p>
+    <p class="body-text reveal" style="margin-top:2rem; color: var(--text-muted)">2026 — slides-it</p>
+  </div>
+</section>
+
+<!-- Slide 2: Three columns with icons -->
+<section class="slide" data-index="1">
+  <div class="slide-inner">
+    <h2 class="heading-rule reveal">Three principles</h2>
+    <div class="card-grid reveal">
+      <div class="card">
+        <i data-lucide="circle-dashed" class="card-icon"></i>
+        <p class="card-label">01</p>
+        <p class="card-title">Restraint</p>
+        <p class="card-body">Every element must earn its place. When in doubt, remove it.</p>
+      </div>
+      <div class="card">
+        <i data-lucide="eye" class="card-icon"></i>
+        <p class="card-label">02</p>
+        <p class="card-title">Clarity</p>
+        <p class="card-body">One idea per slide. Give the audience time to think.</p>
+      </div>
+      <div class="card">
+        <i data-lucide="text" class="card-icon"></i>
+        <p class="card-label">03</p>
+        <p class="card-title">Rhythm</p>
+        <p class="card-body">Typography sets the pace. White space is punctuation.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 3: Bullet list -->
+<section class="slide" data-index="2">
+  <div class="slide-inner">
+    <p class="label reveal">What makes it work</p>
+    <h2 class="reveal" style="margin: 0.75rem 0 1.5rem">Design decisions<br>that matter</h2>
+    <ul class="bullet-list">
+      <li class="reveal">Subtle geometric shapes add depth without overwhelming</li>
+      <li class="reveal">Serif headings contrast with humanist sans body text for natural hierarchy</li>
+      <li class="reveal">Warm off-white background reduces eye strain across long presentations</li>
+      <li class="reveal">Monochrome accent palette eliminates distracting color decisions</li>
+    </ul>
+  </div>
+</section>
+
+<!-- Slide 4: Stats -->
+<section class="slide" data-index="3">
+  <div class="slide-inner">
+    <p class="label reveal">By the numbers</p>
+    <hr class="divider reveal">
+    <div class="stat-row reveal">
+      <div class="stat">
+        <span class="stat-number">∞</span>
+        <span class="stat-desc">Topics it suits</span>
+      </div>
+      <div class="stat">
+        <span class="stat-number">0</span>
+        <span class="stat-desc">Gradients used</span>
+      </div>
+      <div class="stat">
+        <span class="stat-number">1</span>
+        <span class="stat-desc">Idea per slide</span>
+      </div>
+    </div>
+    <hr class="divider reveal" style="margin-top: 2.5rem">
+    <p class="body-text reveal">The best slide is the one that makes your point impossible to miss.</p>
+  </div>
+</section>
+
+<!-- Slide 5: Quote / closing -->
+<section class="slide" data-index="4">
+  <div class="slide-inner">
+    <div class="blockquote reveal">
+      <p>"Perfection is achieved not when there is nothing more to add, but when there is nothing left to take away."</p>
+      <cite>Antoine de Saint-Exupéry</cite>
+    </div>
+    <hr class="divider reveal" style="margin-top: 2.5rem">
+    <p class="label reveal">slides-it · minimal theme · generated with AI</p>
+  </div>
+</section>
+
+<script>
+// Initialize icons
+if (typeof lucide !== 'undefined') {
+  lucide.createIcons();
+}
+
+class SlidePresentation {
+  constructor() {
+    this.slides = document.querySelectorAll('.slide');
+    this.currentSlide = 0;
+    this.setupProgressBar();
+    this.setupNavDots();
+    this.setupIntersectionObserver();
+    this.setupKeyboardNav();
+    this.setupTouchNav();
+    this.setupMouseWheel();
+  }
+
+  setupProgressBar() {
+    const bar = document.getElementById('progressBar');
+    const update = () => {
+      const scrolled = window.scrollY;
+      const total = document.body.scrollHeight - window.innerHeight;
+      bar.style.width = total > 0 ? (scrolled / total * 100) + '%' : '0%';
+    };
+    window.addEventListener('scroll', update, { passive: true });
+    update();
+  }
+
+  setupNavDots() {
+    const nav = document.getElementById('navDots');
+    this.slides.forEach((_, i) => {
+      const btn = document.createElement('button');
+      btn.setAttribute('aria-label', `Go to slide ${i + 1}`);
+      if (i === 0) btn.classList.add('active');
+      btn.addEventListener('click', () => this.goTo(i));
+      nav.appendChild(btn);
+    });
+    this.dots = nav.querySelectorAll('button');
+
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          const idx = parseInt(e.target.dataset.index);
+          this.dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+          this.currentSlide = idx;
+        }
+      });
+    }, { threshold: 0.5 });
+    this.slides.forEach(s => obs.observe(s));
+  }
+
+  setupIntersectionObserver() {
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
+        }
+      });
+    }, { threshold: 0.15 });
+    this.slides.forEach(s => obs.observe(s));
+  }
+
+  setupKeyboardNav() {
+    document.addEventListener('keydown', e => {
+      if (e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+        e.preventDefault(); this.goTo(this.currentSlide + 1);
+      } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        e.preventDefault(); this.goTo(this.currentSlide - 1);
+      }
+    });
+  }
+
+  setupTouchNav() {
+    let startY = 0;
+    document.addEventListener('touchstart', e => { startY = e.touches[0].clientY; }, { passive: true });
+    document.addEventListener('touchend', e => {
+      const dy = startY - e.changedTouches[0].clientY;
+      if (Math.abs(dy) > 40) this.goTo(this.currentSlide + (dy > 0 ? 1 : -1));
+    }, { passive: true });
+  }
+
+  setupMouseWheel() {
+    let last = 0;
+    document.addEventListener('wheel', e => {
+      const now = Date.now();
+      if (now - last < 800) return;
+      last = now;
+      this.goTo(this.currentSlide + (e.deltaY > 0 ? 1 : -1));
+    }, { passive: true });
+  }
+
+  goTo(idx) {
+    const clamped = Math.max(0, Math.min(this.slides.length - 1, idx));
+    this.slides[clamped].scrollIntoView({ behavior: 'smooth' });
+    this.currentSlide = clamped;
+  }
+}
+
+new SlidePresentation();
+</script>
+</body>
+</html>
