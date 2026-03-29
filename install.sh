@@ -126,64 +126,18 @@ chmod +x "$DEST"
 
 ok "Installed: $DEST"
 
-# Symlink to /usr/local/bin for universal PATH availability
-# (works across all shells and terminal emulators without sourcing any profile)
-if [ -d /usr/local/bin ] && [ -w /usr/local/bin ]; then
-    ln -sf "$DEST" /usr/local/bin/slides-it
-    ok "Symlinked to /usr/local/bin/slides-it"
-fi
-
-# Symlink opencode too if it's in ~/.local/bin
-if [ -f "${HOME}/.local/bin/opencode" ]; then
-    if [ -d /usr/local/bin ] && [ -w /usr/local/bin ]; then
-        ln -sf "${HOME}/.local/bin/opencode" /usr/local/bin/opencode
-        ok "Symlinked opencode to /usr/local/bin/opencode"
-    fi
-fi
-
 # ---------------------------------------------------------------------------
-# 7. PATH check — write shell profile as fallback
-# ---------------------------------------------------------------------------
-
-# Detect shell profile
-SHELL_NAME="$(basename "${SHELL:-bash}")"
-if [ "$SHELL_NAME" = "zsh" ]; then
-    PROFILE="${HOME}/.zshrc"
-elif [ "$SHELL_NAME" = "bash" ]; then
-    if [ -f "${HOME}/.bash_profile" ]; then
-        PROFILE="${HOME}/.bash_profile"
-    else
-        PROFILE="${HOME}/.bashrc"
-    fi
-else
-    PROFILE="${HOME}/.profile"
-fi
-
-LINE='export PATH="$HOME/.local/bin:$PATH"'
-
-# Check profile file contents (not current $PATH which may be polluted by sub-shells)
-if ! grep -qF '.local/bin' "$PROFILE" 2>/dev/null; then
-    printf '\n# Added by slides-it installer\n%s\n' "$LINE" >> "$PROFILE"
-    ok "Added ~/.local/bin to PATH in $PROFILE"
-    echo ""
-    echo "  Run this to apply in the current terminal:"
-    echo ""
-    echo "    source $PROFILE"
-    echo ""
-    echo "  (New terminals will work automatically)"
-    echo ""
-else
-    ok "~/.local/bin already configured in $PROFILE"
-fi
-
-# ---------------------------------------------------------------------------
-# 8. Done
+# 7. Done
 # ---------------------------------------------------------------------------
 
 echo ""
 printf '\033[1;32mslides-it %s installed successfully!\033[0m\n' "$LATEST_TAG"
 echo ""
-echo "  Get started:"
+echo "  To make slides-it and opencode permanently available in your shell, run:"
+echo ""
+echo '    echo '"'"'export PATH="$HOME/.local/bin:$HOME/.opencode/bin:$PATH"'"'"' >> ~/.zshrc && source ~/.zshrc'
+echo ""
+echo "  Then get started:"
 echo "    slides-it            # launch the web UI"
 echo "    slides-it --help     # show all commands"
 echo "    slides-it --version  # show version"
