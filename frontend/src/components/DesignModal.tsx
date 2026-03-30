@@ -1,26 +1,26 @@
 import { useEffect, useRef, useState } from 'react'
 import {
-  listTemplates,
-  installTemplate,
-  removeTemplate,
-  activateTemplate,
-  getTemplatePreview,
-  type TemplateEntry,
+  listDesigns,
+  installDesign,
+  removeDesign,
+  activateDesign,
+  getDesignPreview,
+  type DesignEntry,
 } from '../lib/slides-server-api'
 
-interface TemplatesModalProps {
+interface DesignModalProps {
   open: boolean
-  activeTemplate: string
+  activeDesign: string
   onClose: () => void
   onActivate: (name: string) => void
 }
 
-export default function TemplatesModal({
+export default function DesignModal({
   open,
   onClose,
   onActivate,
-}: TemplatesModalProps) {
-  const [templates, setTemplates] = useState<TemplateEntry[]>([])
+}: DesignModalProps) {
+  const [designs, setDesigns] = useState<DesignEntry[]>([])
   const [selected, setSelected] = useState<string>('')
   const [previewHtml, setPreviewHtml] = useState<string>('')
   const [previewLoading, setPreviewLoading] = useState(false)
@@ -30,15 +30,15 @@ export default function TemplatesModal({
   const [actionError, setActionError] = useState('')
   const overlayRef = useRef<HTMLDivElement>(null)
 
-  // Load template list when modal opens
+  // Load design list when modal opens
   useEffect(() => {
     if (!open) return
     setInstallError('')
     setActionError('')
-    listTemplates()
+    listDesigns()
       .then((list) => {
-        setTemplates(list)
-        // Auto-select the active template
+        setDesigns(list)
+        // Auto-select the active design
         const active = list.find((t) => t.active) ?? list[0]
         if (active) {
           setSelected(active.name)
@@ -50,18 +50,18 @@ export default function TemplatesModal({
   // Load preview whenever selection changes
   useEffect(() => {
     if (!selected || !open) return
-    const tpl = templates.find((t) => t.name === selected)
-    if (!tpl?.has_preview) {
+    const design = designs.find((t) => t.name === selected)
+    if (!design?.has_preview) {
       setPreviewHtml('')
       return
     }
     setPreviewLoading(true)
     setPreviewHtml('')
-    getTemplatePreview(selected)
+    getDesignPreview(selected)
       .then((r) => setPreviewHtml(r.html))
       .catch(() => setPreviewHtml(''))
       .finally(() => setPreviewLoading(false))
-  }, [selected, open, templates]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [selected, open, designs]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Close on Escape
   useEffect(() => {
@@ -76,8 +76,8 @@ export default function TemplatesModal({
   async function handleActivate(name: string) {
     setActionError('')
     try {
-      await activateTemplate(name)
-      setTemplates((prev) => prev.map((t) => ({ ...t, active: t.name === name })))
+      await activateDesign(name)
+      setDesigns((prev) => prev.map((t) => ({ ...t, active: t.name === name })))
       onActivate(name)
     } catch (e) {
       setActionError((e as Error).message)
@@ -87,9 +87,9 @@ export default function TemplatesModal({
   async function handleRemove(name: string) {
     setActionError('')
     try {
-      await removeTemplate(name)
-      const newList = templates.filter((t) => t.name !== name)
-      setTemplates(newList)
+      await removeDesign(name)
+      const newList = designs.filter((t) => t.name !== name)
+      setDesigns(newList)
       if (selected === name) {
         const next = newList[0]
         if (next) setSelected(next.name)
@@ -106,11 +106,11 @@ export default function TemplatesModal({
     setInstalling(true)
     setInstallError('')
     try {
-      const res = await installTemplate({ source })
+      const res = await installDesign({ source })
       setInstallSource('')
       // Refresh list
-      const list = await listTemplates()
-      setTemplates(list)
+      const list = await listDesigns()
+      setDesigns(list)
       setSelected(res.name)
     } catch (e) {
       setInstallError((e as Error).message)
@@ -119,7 +119,7 @@ export default function TemplatesModal({
     }
   }
 
-  const selectedTpl = templates.find((t) => t.name === selected)
+  const selectedDesign = designs.find((t) => t.name === selected)
 
   return (
     <div
@@ -137,7 +137,7 @@ export default function TemplatesModal({
           border: '1px solid var(--border)',
         }}
       >
-        {/* ── Left: template list ── */}
+        {/* ── Left: design list ── */}
         <div
           className="flex flex-col flex-shrink-0 overflow-hidden"
           style={{
@@ -152,7 +152,7 @@ export default function TemplatesModal({
             style={{ borderBottom: '1px solid var(--border)' }}
           >
             <span className="text-xs font-semibold tracking-widest uppercase" style={{ color: 'var(--text-muted)' }}>
-              Templates
+              Designs
             </span>
             <button
               onClick={onClose}
@@ -166,33 +166,33 @@ export default function TemplatesModal({
             </button>
           </div>
 
-          {/* Template list */}
+          {/* Design list */}
           <div className="flex-1 overflow-y-auto py-1">
-            {templates.map((tpl) => (
+            {designs.map((design) => (
               <div
-                key={tpl.name}
+                key={design.name}
                 className="flex items-center"
                 style={{
-                  background: selected === tpl.name ? 'var(--bg-user-msg)' : 'transparent',
-                  borderLeft: selected === tpl.name ? '2px solid var(--text-primary)' : '2px solid transparent',
+                  background: selected === design.name ? 'var(--bg-user-msg)' : 'transparent',
+                  borderLeft: selected === design.name ? '2px solid var(--text-primary)' : '2px solid transparent',
                 }}
                 onMouseEnter={e => {
-                  if (selected !== tpl.name) (e.currentTarget as HTMLElement).style.background = 'var(--bg-hover)'
+                  if (selected !== design.name) (e.currentTarget as HTMLElement).style.background = 'var(--bg-hover)'
                 }}
                 onMouseLeave={e => {
-                  (e.currentTarget as HTMLElement).style.background = selected === tpl.name ? 'var(--bg-user-msg)' : 'transparent'
+                  (e.currentTarget as HTMLElement).style.background = selected === design.name ? 'var(--bg-user-msg)' : 'transparent'
                 }}
               >
-                {/* Template name row — click to select */}
+                {/* Design name row — click to select */}
                 <button
-                  onClick={() => setSelected(tpl.name)}
+                  onClick={() => setSelected(design.name)}
                   className="flex-1 text-left px-4 py-2.5 min-w-0"
                 >
                   <div className="flex items-center gap-1.5 mb-0.5">
                     <span className="text-xs font-medium" style={{ color: 'var(--text-primary)' }}>
-                      {tpl.name}
+                      {design.name}
                     </span>
-                    {tpl.active && (
+                    {design.active && (
                       <span
                         className="text-[9px] px-1.5 py-0.5 rounded font-medium"
                         style={{ background: 'var(--bg-hover)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}
@@ -202,17 +202,17 @@ export default function TemplatesModal({
                     )}
                   </div>
                   <p className="text-[11px] leading-snug truncate" style={{ color: 'var(--text-muted)' }}>
-                    {tpl.description || 'No description'}
+                    {design.description || 'No description'}
                   </p>
                 </button>
 
                 {/* Eye icon — click to preview (without activating) */}
                 <button
-                  onClick={() => setSelected(tpl.name)}
+                  onClick={() => setSelected(design.name)}
                   className="flex-shrink-0 w-7 h-7 flex items-center justify-center mr-2 rounded transition-colors"
-                  style={{ color: selected === tpl.name ? 'var(--text-secondary)' : 'var(--text-muted)' }}
+                  style={{ color: selected === design.name ? 'var(--text-secondary)' : 'var(--text-muted)' }}
                   onMouseEnter={e => (e.currentTarget.style.color = 'var(--text-primary)')}
-                  onMouseLeave={e => (e.currentTarget.style.color = selected === tpl.name ? 'var(--text-secondary)' : 'var(--text-muted)')}
+                  onMouseLeave={e => (e.currentTarget.style.color = selected === design.name ? 'var(--text-secondary)' : 'var(--text-muted)')}
                   title="Preview"
                 >
                   <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -273,19 +273,19 @@ export default function TemplatesModal({
 
         {/* ── Right: preview + actions ── */}
         <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-          {selectedTpl ? (
+          {selectedDesign ? (
             <>
-              {/* Template meta header */}
+              {/* Design meta header */}
               <div
                 className="px-5 py-3 flex items-center justify-between flex-shrink-0"
                 style={{ borderBottom: '1px solid var(--border)' }}
               >
                 <div>
                   <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
-                    {selectedTpl.name}
+                    {selectedDesign.name}
                   </span>
                   <span className="ml-2 text-xs" style={{ color: 'var(--text-muted)' }}>
-                    v{selectedTpl.version} by {selectedTpl.author}
+                    v{selectedDesign.version} by {selectedDesign.author}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
@@ -294,9 +294,9 @@ export default function TemplatesModal({
                       {actionError}
                     </span>
                   )}
-                  {!selectedTpl.active && (
+                  {!selectedDesign.active && (
                     <button
-                      onClick={() => handleActivate(selectedTpl.name)}
+                      onClick={() => handleActivate(selectedDesign.name)}
                       className="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
                       style={{
                         background: 'var(--btn-send)',
@@ -306,10 +306,10 @@ export default function TemplatesModal({
                       onMouseEnter={e => (e.currentTarget.style.background = 'var(--btn-send-hover)')}
                       onMouseLeave={e => (e.currentTarget.style.background = 'var(--btn-send)')}
                     >
-                      Use this template
+                      Use this design
                     </button>
                   )}
-                  {selectedTpl.active && (
+                  {selectedDesign.active && (
                     <span
                       className="px-3 py-1.5 rounded-lg text-xs font-medium"
                       style={{
@@ -322,7 +322,7 @@ export default function TemplatesModal({
                     </span>
                   )}
                   <button
-                    onClick={() => handleRemove(selectedTpl.name)}
+                    onClick={() => handleRemove(selectedDesign.name)}
                       className="px-2.5 py-1.5 rounded-lg text-xs transition-colors"
                       style={{ color: 'var(--text-muted)', border: '1px solid var(--border)' }}
                       onMouseEnter={e => {
@@ -333,7 +333,7 @@ export default function TemplatesModal({
                         (e.currentTarget as HTMLElement).style.color = 'var(--text-muted)'
                         ;(e.currentTarget as HTMLElement).style.borderColor = 'var(--border)'
                       }}
-                      title="Remove template"
+                      title="Remove design"
                     >
                       Remove
                     </button>
@@ -362,7 +362,7 @@ export default function TemplatesModal({
                 {previewHtml && (
                   <iframe
                     srcDoc={previewHtml}
-                    title={`Preview of ${selectedTpl.name}`}
+                    title={`Preview of ${selectedDesign.name}`}
                     className="w-full h-full border-0"
                     sandbox="allow-scripts"
                   />
@@ -371,7 +371,7 @@ export default function TemplatesModal({
             </>
           ) : (
             <div className="flex-1 flex items-center justify-center">
-              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>No templates installed</p>
+              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>No designs installed</p>
             </div>
           )}
         </div>

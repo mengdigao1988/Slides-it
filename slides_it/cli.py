@@ -14,7 +14,7 @@ import typer
 from typing import Annotated
 
 from slides_it import __version__ as _BUNDLED_VERSION
-from slides_it.templates import TemplateManager
+from slides_it.designs import DesignManager
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -83,17 +83,17 @@ app = typer.Typer(
     rich_markup_mode="markdown",
 )
 
-template_app = typer.Typer(
+design_app = typer.Typer(
     help=(
-        "Manage presentation templates.\n\n"
-        "Templates control the visual style the AI uses when generating slides.\n"
-        "Each template is a directory with a SKILL.md (style instructions) and\n"
-        "a TEMPLATE.md (metadata). Built-in templates ship with slides-it;\n"
-        "community templates can be installed from the official registry or any URL."
+        "Manage presentation designs.\n\n"
+        "Designs control the visual style the AI uses when generating slides.\n"
+        "Each design is a directory with a SKILL.md (style instructions) and\n"
+        "a TEMPLATE.md (metadata). Built-in designs ship with slides-it;\n"
+        "community designs can be installed from the official registry or any URL."
     ),
     rich_markup_mode="markdown",
 )
-app.add_typer(template_app, name="template")
+app.add_typer(design_app, name="design")
 
 _REGISTRY_URL = "https://raw.githubusercontent.com/slides-it/slides-it/main/registry.json"
 _SERVER_PORT = 3000
@@ -188,39 +188,39 @@ def _launch(
 
 
 # ---------------------------------------------------------------------------
-# slides-it template list
+# slides-it design list
 # ---------------------------------------------------------------------------
 
-@template_app.command("list")
-def template_list() -> None:
-    """List all installed templates."""
-    tm = TemplateManager()
-    templates = tm.list()
-    active = tm.active()
+@design_app.command("list")
+def design_list() -> None:
+    """List all installed designs."""
+    dm = DesignManager()
+    designs = dm.list()
+    active = dm.active()
 
-    if not templates:
-        typer.echo("No templates installed.")
+    if not designs:
+        typer.echo("No designs installed.")
         return
 
     typer.echo("")
-    for t in templates:
+    for t in designs:
         marker = " *" if t.name == active else "  "
         typer.echo(f"{marker} {t.name}")
         typer.echo(f"     {t.description}  (v{t.version}, by {t.author})")
     typer.echo("")
-    typer.echo("* = active template")
+    typer.echo("* = active design")
     typer.echo("")
 
 
 # ---------------------------------------------------------------------------
-# slides-it template search
+# slides-it design search
 # ---------------------------------------------------------------------------
 
-@template_app.command("search")
-def template_search(
+@design_app.command("search")
+def design_search(
     query: Annotated[str, typer.Argument(help="Search term (leave blank to list all)")] = "",
 ) -> None:
-    """Search the official template registry."""
+    """Search the official design registry."""
     try:
         import httpx
         resp = httpx.get(_REGISTRY_URL, follow_redirects=True, timeout=10)
@@ -230,42 +230,42 @@ def template_search(
         typer.echo(f"Error: could not fetch registry — {e}", err=True)
         raise typer.Exit(1)
 
-    templates = registry.get("templates", [])
+    designs = registry.get("templates", [])
     if query:
         q = query.lower()
-        templates = [t for t in templates if q in t["name"].lower() or q in t.get("description", "").lower()]
+        designs = [t for t in designs if q in t["name"].lower() or q in t.get("description", "").lower()]
 
-    if not templates:
-        typer.echo("No templates found." + (f" Try a different search term." if query else ""))
+    if not designs:
+        typer.echo("No designs found." + (f" Try a different search term." if query else ""))
         return
 
     typer.echo("")
-    for t in templates:
+    for t in designs:
         typer.echo(f"  {t['name']}  (v{t.get('version', '?')}, by {t.get('author', '?')})")
         typer.echo(f"     {t.get('description', '')}")
     typer.echo("")
-    typer.echo(f"Install with: slides-it template install <name>")
+    typer.echo(f"Install with: slides-it design install <name>")
     typer.echo("")
 
 
 # ---------------------------------------------------------------------------
-# slides-it template install
+# slides-it design install
 # ---------------------------------------------------------------------------
 
-@template_app.command("install")
-def template_install(
+@design_app.command("install")
+def design_install(
     source: Annotated[str, typer.Argument(help=(
-        "Template source: registry name, https:// URL (zip), "
+        "Design source: registry name, https:// URL (zip), "
         "github:user/repo, or local ./path"
     ))],
-    name: Annotated[str | None, typer.Option("--name", "-n", help="Override template name")] = None,
+    name: Annotated[str | None, typer.Option("--name", "-n", help="Override design name")] = None,
     activate: Annotated[bool, typer.Option("--activate/--no-activate", help="Activate after install")] = True,
 ) -> None:
-    """Install a template from any source."""
-    tm = TemplateManager()
-    typer.echo(f"Installing template from: {source}")
+    """Install a design from any source."""
+    dm = DesignManager()
+    typer.echo(f"Installing design from: {source}")
     try:
-        installed_name = tm.install(source, name)
+        installed_name = dm.install(source, name)
     except Exception as e:
         typer.echo(f"Error: {e}", err=True)
         raise typer.Exit(1)
@@ -273,25 +273,25 @@ def template_install(
     typer.echo(f"Installed: {installed_name}")
 
     if activate:
-        tm.activate(installed_name)
+        dm.activate(installed_name)
         typer.echo(f"Activated: {installed_name}")
 
 
 # ---------------------------------------------------------------------------
-# slides-it template remove
+# slides-it design remove
 # ---------------------------------------------------------------------------
 
-@template_app.command("remove")
-def template_remove(
-    name: Annotated[str, typer.Argument(help="Template name to remove")],
+@design_app.command("remove")
+def design_remove(
+    name: Annotated[str, typer.Argument(help="Design name to remove")],
     yes: Annotated[bool, typer.Option("--yes", "-y", help="Skip confirmation")] = False,
 ) -> None:
-    """Remove an installed template."""
-    tm = TemplateManager()
+    """Remove an installed design."""
+    dm = DesignManager()
     if not yes:
-        typer.confirm(f"Remove template '{name}'?", abort=True)
+        typer.confirm(f"Remove design '{name}'?", abort=True)
     try:
-        tm.remove(name)
+        dm.remove(name)
     except ValueError as e:
         typer.echo(f"Error: {e}", err=True)
         raise typer.Exit(1)
@@ -299,21 +299,21 @@ def template_remove(
 
 
 # ---------------------------------------------------------------------------
-# slides-it template activate
+# slides-it design activate
 # ---------------------------------------------------------------------------
 
-@template_app.command("activate")
-def template_activate(
-    name: Annotated[str, typer.Argument(help="Template name to activate")],
+@design_app.command("activate")
+def design_activate(
+    name: Annotated[str, typer.Argument(help="Design name to activate")],
 ) -> None:
-    """Set the active template."""
-    tm = TemplateManager()
+    """Set the active design."""
+    dm = DesignManager()
     try:
-        tm.activate(name)
+        dm.activate(name)
     except ValueError as e:
         typer.echo(f"Error: {e}", err=True)
         raise typer.Exit(1)
-    typer.echo(f"Active template: {name}")
+    typer.echo(f"Active design: {name}")
 
 
 # ---------------------------------------------------------------------------

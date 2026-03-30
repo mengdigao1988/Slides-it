@@ -7,7 +7,7 @@ import WorkspaceSelector from './components/WorkspaceSelector'
 import SettingsModal from './components/SettingsModal'
 import SessionPanel from './components/SessionPanel'
 import ErrorBoundary from './components/ErrorBoundary'
-import { getTemplateSkill, getStatus } from './lib/slides-server-api'
+import { getDesignSkill, getStatus } from './lib/slides-server-api'
 import type { Todo, FileDiff } from './lib/opencode-api'
 
 type Page = 'workspace' | 'chat' | 'loading'
@@ -16,7 +16,7 @@ export default function App() {
   const [page, setPage] = useState<Page>('loading')
   const [agentVersion, setAgentVersion] = useState('')
   const [workspacePath, setWorkspacePath] = useState('')
-  const [activeTemplate, setActiveTemplate] = useState('default')
+  const [activeDesign, setActiveDesign] = useState('default')
   const [activeSkill, setActiveSkill] = useState('')
   const [previewFile, setPreviewFile] = useState<string | null>(null)
   const [fileTreeRefreshToken, setFileTreeRefreshToken] = useState(0)
@@ -33,7 +33,7 @@ export default function App() {
         if (s.ready && s.workspace) {
           setWorkspacePath(s.workspace)
           setAgentVersion(s.opencode_version)
-          getTemplateSkill('default').then((r) => setActiveSkill(r.skill)).catch(() => {})
+          getDesignSkill('default').then((r) => setActiveSkill(r.skill)).catch(() => {})
           setPage('chat')
         } else {
           setPage('workspace')
@@ -48,14 +48,14 @@ export default function App() {
     setWorkspacePath(workspace)
     setAgentVersion(version)
     setPage('chat')
-    // Load the default template skill on workspace start
-    getTemplateSkill('default').then((r) => setActiveSkill(r.skill)).catch(() => {})
+    // Load the default design skill on workspace start
+    getDesignSkill('default').then((r) => setActiveSkill(r.skill)).catch(() => {})
   }
 
-  async function handleTemplateChange(name: string): Promise<string> {
-    setActiveTemplate(name)
+  async function handleDesignChange(name: string): Promise<string> {
+    setActiveDesign(name)
     try {
-      const r = await getTemplateSkill(name)
+      const r = await getDesignSkill(name)
       setActiveSkill(r.skill)
       return r.skill
     } catch {
@@ -121,8 +121,8 @@ export default function App() {
           <ChatPanel
             workspacePath={workspacePath}
             activeSkill={activeSkill}
-            activeTemplate={activeTemplate}
-            onTemplateChange={handleTemplateChange}
+            activeDesign={activeDesign}
+            onDesignChange={handleDesignChange}
             modelRefreshToken={modelRefreshToken}
             onHtmlGenerated={(path) => {
               setPreviewFile(toRelative(path))

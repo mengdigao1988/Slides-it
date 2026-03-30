@@ -101,27 +101,27 @@ export function setModel(modelID: string): Promise<{ modelID: string }> {
   })
 }
 
-export interface TemplateSkillResponse {
+export interface DesignSkillResponse {
   skill: string
 }
 
 /**
- * Fetch the combined system prompt (core SKILL.md + template SKILL.md)
- * for the given template name.
+ * Fetch the combined system prompt (core SKILL.md + design SKILL.md)
+ * for the given design name.
  */
-export function getTemplateSkill(name: string): Promise<TemplateSkillResponse> {
-  return request<TemplateSkillResponse>(`/api/template/${encodeURIComponent(name)}/skill`)
+export function getDesignSkill(name: string): Promise<DesignSkillResponse> {
+  return request<DesignSkillResponse>(`/api/design/${encodeURIComponent(name)}/skill`)
 }
 
-export interface TemplatePreviewResponse {
+export interface DesignPreviewResponse {
   html: string
 }
 
-export function getTemplatePreview(name: string): Promise<TemplatePreviewResponse> {
-  return request<TemplatePreviewResponse>(`/api/template/${encodeURIComponent(name)}/preview`)
+export function getDesignPreview(name: string): Promise<DesignPreviewResponse> {
+  return request<DesignPreviewResponse>(`/api/design/${encodeURIComponent(name)}/preview`)
 }
 
-export interface TemplateDetail {
+export interface DesignDetail {
   name: string
   description: string
   author: string
@@ -133,14 +133,14 @@ export interface TemplateDetail {
 }
 
 /**
- * Fetch full template details — metadata, SKILL.md, and preview.html — in one call.
- * Mirrors the agent-facing GET /api/template/{name} endpoint.
+ * Fetch full design details — metadata, SKILL.md, and preview.html — in one call.
+ * Mirrors the agent-facing GET /api/design/{name} endpoint.
  */
-export function getTemplate(name: string): Promise<TemplateDetail> {
-  return request<TemplateDetail>(`/api/template/${encodeURIComponent(name)}`)
+export function getDesign(name: string): Promise<DesignDetail> {
+  return request<DesignDetail>(`/api/design/${encodeURIComponent(name)}`)
 }
 
-export interface TemplateEntry {
+export interface DesignEntry {
   name: string
   description: string
   author: string
@@ -149,21 +149,21 @@ export interface TemplateEntry {
   has_preview: boolean
 }
 
-export function listTemplates(): Promise<TemplateEntry[]> {
-  return request<TemplateEntry[]>('/api/templates')
+export function listDesigns(): Promise<DesignEntry[]> {
+  return request<DesignEntry[]>('/api/designs')
 }
 
 /**
- * Install a template — two modes, same endpoint:
+ * Install a design — two modes, same endpoint:
  *
  * Mode A (source URL / registry):
- *   installTemplate({ source: "https://..." })
- *   installTemplate({ source: "github:user/repo" })
+ *   installDesign({ source: "https://..." })
+ *   installDesign({ source: "github:user/repo" })
  *
  * Mode B (inline content — used by the AI agent and future UI upload):
- *   installTemplate({ name: "blue-minimal", skill_md: "...", preview_html: "...", activate: true })
+ *   installDesign({ name: "blue-minimal", skill_md: "...", preview_html: "...", activate: true })
  */
-export interface InstallTemplatePayload {
+export interface InstallDesignPayload {
   // Mode A
   source?: string
   // Mode B
@@ -174,23 +174,23 @@ export interface InstallTemplatePayload {
   activate?: boolean
 }
 
-export function installTemplate(
-  payload: InstallTemplatePayload,
+export function installDesign(
+  payload: InstallDesignPayload,
 ): Promise<{ name: string; status: string; activated: string }> {
-  return request<{ name: string; status: string; activated: string }>('/api/templates/install', {
+  return request<{ name: string; status: string; activated: string }>('/api/designs/install', {
     method: 'POST',
     body: JSON.stringify(payload),
   })
 }
 
-export function removeTemplate(name: string): Promise<{ name: string; status: string }> {
-  return request<{ name: string; status: string }>(`/api/templates/${encodeURIComponent(name)}`, {
+export function removeDesign(name: string): Promise<{ name: string; status: string }> {
+  return request<{ name: string; status: string }>(`/api/designs/${encodeURIComponent(name)}`, {
     method: 'DELETE',
   })
 }
 
-export function activateTemplate(name: string): Promise<{ name: string; status: string }> {
-  return request<{ name: string; status: string }>(`/api/templates/${encodeURIComponent(name)}/activate`, {
+export function activateDesign(name: string): Promise<{ name: string; status: string }> {
+  return request<{ name: string; status: string }>(`/api/designs/${encodeURIComponent(name)}/activate`, {
     method: 'PUT',
   })
 }

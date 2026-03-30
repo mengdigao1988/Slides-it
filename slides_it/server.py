@@ -18,7 +18,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from slides_it.templates import TemplateManager
+from slides_it.designs import DesignManager
 
 # ---------------------------------------------------------------------------
 # Constants
@@ -115,7 +115,7 @@ class SettingsRequest(BaseModel):
     customModel: str
 
 
-class TemplateEntry(BaseModel):
+class DesignEntry(BaseModel):
     name: str
     description: str
     author: str
@@ -124,7 +124,7 @@ class TemplateEntry(BaseModel):
     has_preview: bool
 
 
-class TemplateDetail(BaseModel):
+class DesignDetail(BaseModel):
     name: str
     description: str
     author: str
@@ -140,17 +140,17 @@ class SessionRequest(BaseModel):
     messages: list[dict] = []   # serialised ChatMessage[] from the frontend
 
 
-class InstallTemplateRequest(BaseModel):
+class InstallDesignRequest(BaseModel):
     # Mode A: install from external source (URL, github:user/repo, registry name, local path)
     source: str = ""
 
     # Mode B: install from inline content (used by the AI agent via curl)
     # All three fields are required together when source is empty.
-    name: str = ""           # kebab-case template name, e.g. "blue-minimal"
+    name: str = ""           # kebab-case design name, e.g. "blue-minimal"
     description: str = ""
     skill_md: str = ""       # full SKILL.md content
     preview_html: str = ""   # full preview.html content (may be empty)
-    activate: bool = False   # if True, activate this template after installing
+    activate: bool = False   # if True, activate this design after installing
 
 
 # ---------------------------------------------------------------------------
@@ -362,8 +362,8 @@ def get_models() -> dict[str, object]:
     Return the list of available models (via `opencode models` CLI)
     and the currently active model ID.
     """
-    tm = TemplateManager()
-    current = tm.get_model()
+    dm = DesignManager()
+    current = dm.get_model()
 
     try:
         result = subprocess.run(
@@ -384,89 +384,89 @@ def set_model(body: dict[str, str]) -> dict[str, str]:
     model_id = body.get("modelID", "").strip()
     if not model_id:
         raise HTTPException(status_code=400, detail="modelID is required")
-    TemplateManager().set_model(model_id)
+    DesignManager().set_model(model_id)
     return {"modelID": model_id}
 
 
-@app.get("/api/template/{name}/skill")
-def get_template_skill(name: str) -> dict[str, str]:
+@app.get("/api/design/{name}/skill")
+def get_design_skill(name: str) -> dict[str, str]:
     """
-    Return the combined system prompt for the given template.
+    Return the combined system prompt for the given design.
 
-    Concatenates core SKILL.md + template SKILL.md. The frontend sends this
+    Concatenates core SKILL.md + design SKILL.md. The frontend sends this
     as the `system` field in POST /session/:id/prompt_async so that the active
-    template's visual style is injected on every message without touching any
+    design's visual style is injected on every message without touching any
     config files on disk.
     """
-    tm = TemplateManager()
+    dm = DesignManager()
     try:
-        skill = tm.build_prompt(name)
+        skill = dm.build_prompt(name)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
     return {"skill": skill}
 
 
-@app.get("/api/template/{name}/preview")
-def get_template_preview(name: str) -> dict[str, str]:
+@app.get("/api/design/{name}/preview")
+def get_design_preview(name: str) -> dict[str, str]:
     """
-    Return the raw HTML content of preview.html for the given template.
+    Return the raw HTML content of preview.html for the given design.
     The frontend injects this into an iframe via srcdoc.
     """
-    tm = TemplateManager()
-    path = tm._template_path(name)
+    dm = DesignManager()
+    path = dm._design_path(name)
     if not path:
-        raise HTTPException(status_code=404, detail=f"Template '{name}' not found")
+        raise HTTPException(status_code=404, detail=f"Design '{name}' not found")
     preview_file = path / "preview.html"
     if not preview_file.exists():
-        raise HTTPException(status_code=404, detail=f"Template '{name}' has no preview.html")
+        raise HTTPException(status_code=404, detail=f"Design '{name}' has no preview.html")
     return {"html": preview_file.read_text(encoding="utf-8")}
 
 
-@app.get("/api/template/{name}", response_model=TemplateDetail)
-def get_template(name: str) -> TemplateDetail:
+@app.get("/api/design/{name}", response_model=DesignDetail)
+def get_design(name: str) -> DesignDetail:
     """
-    Return full details for a single template — metadata, SKILL.md, and preview.html.
+    Return full details for a single design — metadata, SKILL.md, and preview.html.
 
-    Used by the AI agent to fetch the active template's visual reference in one
+    Used by the AI agent to fetch the active design's visual reference in one
     call before generating slides. Also available to the frontend for any future
     use that needs all fields together.
 
-    preview_html is null if the template has no preview.html.
-    skill_md contains only the template's own SKILL.md (not the core skill).
+    preview_html is null if the design has no preview.html.
+    skill_md contains only the design's own SKILL.md (not the core skill).
     """
-    tm = TemplateManager()
-    path = tm._template_path(name)
+    dm = DesignManager()
+    path = dm._design_path(name)
     if not path:
-        raise HTTPException(status_code=404, detail=f"Template '{name}' not found")
-    info = tm._parse_template_md(path / "TEMPLATE.md")
+        raise HTTPException(status_code=404, detail=f"Design '{name}' not found")
+    info = dm._parse_design_md(path / "TEMPLATE.md")
     if not info:
-        raise HTTPException(status_code=404, detail=f"Template '{name}' has no TEMPLATE.md")
+        raise HTTPException(status_code=404, detail=f"Design '{name}' has no TEMPLATE.md")
     skill_file = path / "SKILL.md"
     if not skill_file.exists():
-        raise HTTPException(status_code=404, detail=f"Template '{name}' has no SKILL.md")
+        raise HTTPException(status_code=404, detail=f"Design '{name}' has no SKILL.md")
     preview_file = path / "preview.html"
-    return TemplateDetail(
+    return DesignDetail(
         name=info.name,
         description=info.description,
         author=info.author,
         version=info.version,
-        active=info.name == tm.active(),
+        active=info.name == dm.active(),
         has_preview=preview_file.exists(),
         skill_md=skill_file.read_text(encoding="utf-8"),
         preview_html=preview_file.read_text(encoding="utf-8") if preview_file.exists() else None,
     )
 
 
-@app.get("/api/templates", response_model=list[TemplateEntry])
-def list_templates() -> list[TemplateEntry]:
-    """Return all installed templates with metadata."""
-    tm = TemplateManager()
-    active = tm.active()
+@app.get("/api/designs", response_model=list[DesignEntry])
+def list_designs() -> list[DesignEntry]:
+    """Return all installed designs with metadata."""
+    dm = DesignManager()
+    active = dm.active()
     result = []
-    for info in tm.list():
-        path = tm._template_path(info.name)
+    for info in dm.list():
+        path = dm._design_path(info.name)
         has_preview = bool(path and (path / "preview.html").exists())
-        result.append(TemplateEntry(
+        result.append(DesignEntry(
             name=info.name,
             description=info.description,
             author=info.author,
@@ -477,10 +477,10 @@ def list_templates() -> list[TemplateEntry]:
     return result
 
 
-@app.post("/api/templates/install")
-def install_template(req: InstallTemplateRequest) -> dict[str, str]:
+@app.post("/api/designs/install")
+def install_design(req: InstallDesignRequest) -> dict[str, str]:
     """
-    Install a template — two modes:
+    Install a design — two modes:
 
     Mode A (source): install from any external source.
         { "source": "https://...", "activate": true }
@@ -501,18 +501,18 @@ def install_template(req: InstallTemplateRequest) -> dict[str, str]:
     _install_from_path() codepath used by Mode A.  This keeps all install
     logic in one place.
     """
-    tm = TemplateManager()
+    dm = DesignManager()
 
     if req.source.strip():
         # ── Mode A: external source ───────────────────────────────────────
         source = req.source.strip()
         try:
-            name = tm.install(source)
+            name = dm.install(source)
         except Exception as e:
             raise HTTPException(status_code=400, detail=str(e))
         if req.activate:
             try:
-                tm.activate(name)
+                dm.activate(name)
             except ValueError as e:
                 raise HTTPException(status_code=400, detail=str(e))
         return {"name": name, "status": "installed", "activated": str(req.activate).lower()}
@@ -540,7 +540,7 @@ def install_template(req: InstallTemplateRequest) -> dict[str, str]:
             template_md = (
                 "---\n"
                 f"name: {name}\n"
-                f"description: {req.description.strip() or 'AI-generated template'}\n"
+                f"description: {req.description.strip() or 'AI-generated design'}\n"
                 "author: ai-generated\n"
                 "version: 1.0.0\n"
                 "---\n"
@@ -555,36 +555,36 @@ def install_template(req: InstallTemplateRequest) -> dict[str, str]:
                 (tmp_path / "preview.html").write_text(req.preview_html, encoding="utf-8")
 
             try:
-                installed_name = tm.install(str(tmp_path))
+                installed_name = dm.install(str(tmp_path))
             except Exception as e:
                 raise HTTPException(status_code=400, detail=str(e))
 
         if req.activate:
             try:
-                tm.activate(installed_name)
+                dm.activate(installed_name)
             except ValueError as e:
                 raise HTTPException(status_code=400, detail=str(e))
 
         return {"name": installed_name, "status": "installed", "activated": str(req.activate).lower()}
 
 
-@app.delete("/api/templates/{name}")
-def delete_template(name: str) -> dict[str, str]:
-    """Remove a user-installed template. Built-in templates cannot be removed."""
-    tm = TemplateManager()
+@app.delete("/api/designs/{name}")
+def delete_design(name: str) -> dict[str, str]:
+    """Remove an installed design."""
+    dm = DesignManager()
     try:
-        tm.remove(name)
+        dm.remove(name)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     return {"name": name, "status": "removed"}
 
 
-@app.put("/api/templates/{name}/activate")
-def activate_template(name: str) -> dict[str, str]:
-    """Set the active template."""
-    tm = TemplateManager()
+@app.put("/api/designs/{name}/activate")
+def activate_design(name: str) -> dict[str, str]:
+    """Set the active design."""
+    dm = DesignManager()
     try:
-        tm.activate(name)
+        dm.activate(name)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
     return {"name": name, "status": "activated"}

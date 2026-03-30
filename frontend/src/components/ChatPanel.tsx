@@ -31,12 +31,12 @@ import {
   type ToolEntry,
   type QuestionRequest,
 } from '../lib/typewriter'
-import { getModels, setModel, listTemplates, getSession, saveSession, uploadFiles, type TemplateEntry } from '../lib/slides-server-api'
+import { getModels, setModel, getSession, saveSession, uploadFiles } from '../lib/slides-server-api'
 import ThinkingDots from './ThinkingDots'
 import ToolBlock from './ToolBlock'
 import QuestionBlock from './QuestionBlock'
 import AtPopover from './AtPopover'
-import TemplatesModal from './TemplatesModal'
+import DesignModal from './DesignModal'
 
 const MarkdownRenderer = lazy(() => import('./MarkdownRenderer'))
 
@@ -45,8 +45,8 @@ type Mode = 'build' | 'plan'
 interface ChatPanelProps {
   workspacePath: string
   activeSkill?: string
-  activeTemplate?: string
-  onTemplateChange?: (name: string) => Promise<string>
+  activeDesign?: string
+  onDesignChange?: (name: string) => Promise<string>
   onHtmlGenerated: (path: string) => void
   onTodosChange?: (todos: Todo[]) => void
   onDiffsChange?: (diffs: FileDiff[]) => void
@@ -58,7 +58,7 @@ interface AtReference {
   name: string
 }
 
-export default function ChatPanel({ workspacePath, activeSkill, activeTemplate, onTemplateChange, onHtmlGenerated, onTodosChange, onDiffsChange, modelRefreshToken }: ChatPanelProps) {
+export default function ChatPanel({ workspacePath, activeSkill, activeDesign, onDesignChange, onHtmlGenerated, onTodosChange, onDiffsChange, modelRefreshToken }: ChatPanelProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [sending, setSending] = useState(false)
   const [input, setInput] = useState('')
@@ -81,11 +81,8 @@ export default function ChatPanel({ workspacePath, activeSkill, activeTemplate, 
   const [modelSwitchError, setModelSwitchError] = useState('')
   const modelDropdownRef = useRef<HTMLDivElement>(null)
 
-  // Template pill
-  const [templateList, setTemplateList] = useState<TemplateEntry[]>([])
-  const [templateOpen, setTemplateOpen] = useState(false)
-  const [templatesModalOpen, setTemplatesModalOpen] = useState(false)
-  const templateDropdownRef = useRef<HTMLDivElement>(null)
+  // Design button
+  const [designModalOpen, setDesignModalOpen] = useState(false)
 
   const messagesContainerRef = useRef<HTMLDivElement>(null)
   const eventSourceRef = useRef<EventSource | null>(null)
@@ -131,22 +128,6 @@ export default function ChatPanel({ workspacePath, activeSkill, activeTemplate, 
     return () => document.removeEventListener('mousedown', handleClick)
   }, [modelOpen])
 
-  // Load template list + close on outside click
-  useEffect(() => {
-    if (!templateOpen) return
-    listTemplates().then((list) => setTemplateList(list)).catch(() => {})
-  }, [templateOpen])
-
-  useEffect(() => {
-    function handleClick(e: MouseEvent) {
-      if (templateDropdownRef.current && !templateDropdownRef.current.contains(e.target as Node)) {
-        setTemplateOpen(false)
-      }
-    }
-    if (templateOpen) document.addEventListener('mousedown', handleClick)
-    return () => document.removeEventListener('mousedown', handleClick)
-  }, [templateOpen])
-
   async function handleModelSelect(modelID: string) {
     const prev = currentModel
     setCurrentModel(modelID)
@@ -161,14 +142,13 @@ export default function ChatPanel({ workspacePath, activeSkill, activeTemplate, 
     }
   }
 
-  async function handleTemplateSelect(name: string) {
-    setTemplateOpen(false)
-    if (name === activeTemplate) return
+  async function handleDesignSelect(name: string) {
+    if (name === activeDesign) return
     // Fetch new skill first, get it back directly (don't rely on React state update timing)
-    const newSkill = onTemplateChange ? await onTemplateChange(name) : (activeSkill || undefined)
-    // Auto-send a message so the agent actively acknowledges the new template
+    const newSkill = onDesignChange ? await onDesignChange(name) : (activeSkill || undefined)
+    // Auto-send a message so the agent actively acknowledges the new design
     if (sessionId) {
-      const text = `I've switched to the "${name}" template. Please use this visual style for all future slide generation.`
+      const text = `I've switched to the "${name}" design. Please use this visual style for all future slide generation.`
       setMessages((prev) => [...prev, {
         id: `u-${Date.now()}`,
         role: 'user',
@@ -866,82 +846,24 @@ export default function ChatPanel({ workspacePath, activeSkill, activeTemplate, 
     </div>
   )
 
-  // ── Template pill ─────────────────────────────────────────────────────────
-  const templatePill = onTemplateChange ? (    <div className="relative" ref={templateDropdownRef}>
-      <button
-        onClick={() => setTemplateOpen((o) => !o)}
-        className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] transition-colors"
-        style={{
-          color: 'var(--text-muted)',
-          border: '1px solid var(--border)',
-          background: 'var(--bg-surface)',
-          fontFamily: 'inherit',
-        }}
-        onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-hover)')}
-        onMouseLeave={e => (e.currentTarget.style.background = 'var(--bg-surface)')}
-        title="Switch template"
-      >
-        <span className="w-2 h-2 rounded-sm flex-shrink-0" style={{ background: 'var(--text-muted)' }} />
-        <span className="truncate max-w-[100px]">{activeTemplate ?? 'default'}</span>
-        <svg
-          className="w-2.5 h-2.5 flex-shrink-0 transition-transform"
-          style={{ transform: templateOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
-          fill="none" viewBox="0 0 24 24" stroke="currentColor"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-        </svg>
-      </button>
-
-      {templateOpen && (
-        <div
-          className="absolute bottom-full mb-1 left-0 z-50 rounded-xl py-1 overflow-y-auto"
-          style={{
-            background: 'var(--bg-surface)',
-            border: '1px solid var(--border)',
-            boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-            minWidth: '180px',
-            maxHeight: '200px',
-          }}
-        >
-          {(templateList.length > 0 ? templateList : [{ name: activeTemplate ?? 'default', active: true } as TemplateEntry]).map((t) => (
-            <button
-              key={t.name}
-              onClick={() => handleTemplateSelect(t.name)}
-              className="w-full text-left px-3 py-1.5 text-[11px] transition-colors flex items-center gap-2"
-              style={{
-                color: t.name === activeTemplate ? 'var(--text-primary)' : 'var(--text-secondary)',
-                fontWeight: t.name === activeTemplate ? 500 : 400,
-              }}
-              onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-hover)')}
-              onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-            >
-              {t.name === activeTemplate
-                ? <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: 'var(--green-dot)' }} />
-                : <span className="w-1.5 h-1.5 flex-shrink-0" />
-              }
-              <span className="truncate flex-1">{t.name}</span>
-            </button>
-          ))}
-
-          {/* Divider + manage button */}
-          <div style={{ borderTop: '1px solid var(--border)', margin: '4px 0' }} />
-          <button
-            onClick={() => { setTemplateOpen(false); setTemplatesModalOpen(true) }}
-            className="w-full text-left px-3 py-1.5 text-[11px] transition-colors flex items-center gap-2"
-            style={{ color: 'var(--text-muted)' }}
-            onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-hover)')}
-            onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-          >
-            <svg className="w-3 h-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-            <span>Manage templates</span>
-          </button>
-        </div>
-      )}
-    </div>
+  // ── Design button ─────────────────────────────────────────────────────────
+  const designButton = onDesignChange ? (
+    <button
+      onClick={() => setDesignModalOpen(true)}
+      className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] transition-colors"
+      style={{
+        color: 'var(--text-muted)',
+        border: '1px solid var(--border)',
+        background: 'var(--bg-surface)',
+        fontFamily: 'inherit',
+      }}
+      onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-hover)')}
+      onMouseLeave={e => (e.currentTarget.style.background = 'var(--bg-surface)')}
+      title="Manage designs"
+    >
+      <span className="w-2 h-2 rounded-sm flex-shrink-0" style={{ background: 'var(--text-muted)' }} />
+      <span className="truncate max-w-[100px]">{activeDesign ?? 'default'}</span>
+    </button>
   ) : null
 
   // ── Model pill ───────────────────────────────────────────────────────────
@@ -1031,14 +953,14 @@ export default function ChatPanel({ workspacePath, activeSkill, activeTemplate, 
 
       {modelErrorToast}
 
-      {/* Templates modal — managed here so TitleBar doesn't need to know about it */}
-      <TemplatesModal
-        open={templatesModalOpen}
-        activeTemplate={activeTemplate ?? 'default'}
-        onClose={() => setTemplatesModalOpen(false)}
+      {/* Design modal — managed here so TitleBar doesn't need to know about it */}
+      <DesignModal
+        open={designModalOpen}
+        activeDesign={activeDesign ?? 'default'}
+        onClose={() => setDesignModalOpen(false)}
         onActivate={(name) => {
-          setTemplatesModalOpen(false)
-          if (onTemplateChange) handleTemplateSelect(name)
+          setDesignModalOpen(false)
+          if (onDesignChange) handleDesignSelect(name)
         }}
       />
 
@@ -1062,7 +984,7 @@ export default function ChatPanel({ workspacePath, activeSkill, activeTemplate, 
           <div style={{ width: '100%', maxWidth: '560px' }}>
             {inputBox}
             <div className="mt-2 flex justify-start gap-2">
-              {templatePill}
+              {designButton}
               {modelPill}
             </div>
           </div>
@@ -1113,7 +1035,7 @@ export default function ChatPanel({ workspacePath, activeSkill, activeTemplate, 
           <div className="flex-shrink-0 px-4 pb-4 pt-2">
             {inputBox}
             <div className="mt-2 flex justify-start gap-2">
-              {templatePill}
+              {designButton}
               {modelPill}
             </div>
           </div>
