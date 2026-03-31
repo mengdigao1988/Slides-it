@@ -165,28 +165,9 @@ export default function ChatPanel({ workspacePath, activeSkill, activeDesign, on
 
   async function handleDesignSelect(name: string) {
     if (name === activeDesign) return
-    // Fetch new skill first, get it back directly (don't rely on React state update timing)
-    const newSkill = onDesignChange ? await onDesignChange(name) : (activeSkill || undefined)
-    // Auto-send a message so the agent actively acknowledges the new design
-    if (sessionId) {
-      const text = `I've switched to the "${name}" design. Please use this visual style for all future slide generation.`
-      setMessages((prev) => [...prev, {
-        id: `u-${Date.now()}`,
-        role: 'user',
-        text,
-        streaming: false,
-        error: null,
-        timestamp: new Date(),
-        tools: [],
-      }])
-      setSending(true)
-      try {
-        await sendPrompt(sessionId, text, currentModel || undefined, currentMode, undefined, newSkill || undefined)
-      } catch (e) {
-        setChatError((e as Error).message)
-        setSending(false)
-      }
-    }
+    // Silently update the system prompt — no message sent to agent.
+    // The new design takes effect on the next user message automatically.
+    if (onDesignChange) await onDesignChange(name)
   }
 
   async function handleIndustrySelect(name: string) {
@@ -195,28 +176,9 @@ export default function ChatPanel({ workspacePath, activeSkill, activeDesign, on
       return
     }
     setIndustryOpen(false)
-    // Fetch new skill (with industry context), get it back directly
-    const newSkill = onIndustryChange ? await onIndustryChange(name) : (activeSkill || undefined)
-    // Auto-send a message so the agent acknowledges the industry switch
-    if (sessionId) {
-      const text = `I've switched to the "${name}" industry context. Please follow the industry-specific report structure and terminology for all future slide generation.`
-      setMessages((prev) => [...prev, {
-        id: `u-${Date.now()}`,
-        role: 'user',
-        text,
-        streaming: false,
-        error: null,
-        timestamp: new Date(),
-        tools: [],
-      }])
-      setSending(true)
-      try {
-        await sendPrompt(sessionId, text, currentModel || undefined, currentMode, undefined, newSkill || undefined)
-      } catch (e) {
-        setChatError((e as Error).message)
-        setSending(false)
-      }
-    }
+    // Silently update the system prompt — no message sent to agent.
+    // The new industry takes effect on the next user message automatically.
+    if (onIndustryChange) await onIndustryChange(name)
   }
 
   // ── Typewriter ──────────────────────────────────────────────────────────
