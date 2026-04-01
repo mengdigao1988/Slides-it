@@ -103,8 +103,9 @@ export default function ChatPanel({ workspacePath, activeSkill, activeDesign, on
   // Track the name of the currently running tool for ThinkingDots label
   const runningToolRef = useRef<string>('')
   const [runningTool, setRunningTool] = useState('')
-  // Double-ESC abort: timestamp of last Escape press
-  const lastEscRef = useRef<number>(0)
+  // ESC-to-abort: warning state + auto-dismiss timer
+  const [escWarning, setEscWarning] = useState(false)
+  const escTimerRef = useRef<number | null>(null)
   // Map question requestID → bubble ID (to attach question to the right bubble)
   const questionBubbleRef = useRef<Map<string, string>>(new Map())
   // Track answered question labels for read-only display
@@ -554,7 +555,35 @@ export default function ChatPanel({ workspacePath, activeSkill, activeDesign, on
     runningToolRef.current = ''
     setRunningTool('')
     setSending(false)
+    setEscWarning(false)
+    if (escTimerRef.current) { clearTimeout(escTimerRef.current); escTimerRef.current = null }
   }
+
+  // Shared ESC-abort handler — called from both textarea onKeyDown and document listener
+  function handleEscPress() {
+    if (!sending) return
+    if (escWarning) {
+      handleAbort()
+    } else {
+      setEscWarning(true)
+      if (escTimerRef.current) clearTimeout(escTimerRef.current)
+      escTimerRef.current = window.setTimeout(() => setEscWarning(false), 3000)
+    }
+  }
+
+  // ── Document-level ESC fallback (fires when textarea is not focused) ──────
+  useEffect(() => {
+    if (!sending) return
+    function handler(e: KeyboardEvent) {
+      if (e.key !== 'Escape') return
+      // Skip if the event originated from the textarea itself — onKeyDown already handles it
+      if (e.target === textareaRef.current) return
+      e.preventDefault()
+      handleEscPress()
+    }
+    document.addEventListener('keydown', handler)
+    return () => document.removeEventListener('keydown', handler)
+  }, [sending, escWarning]) // eslint-disable-line react-hooks/exhaustive-deps
 
   async function handleQuestionReply(requestId: string, answers: string[][]) {
     // Store answers for read-only display
@@ -771,7 +800,7 @@ export default function ChatPanel({ workspacePath, activeSkill, activeDesign, on
           onInput={handleInput}
           onPaste={handlePaste}
           onKeyDown={(e) => {
-            // Escape: close AtPopover if open; double-Escape (within 400ms) → abort
+            // Escape: close AtPopover if open; otherwise two-step abort
             if (e.key === 'Escape') {
               if (atQuery !== null) {
                 e.preventDefault()
@@ -779,14 +808,8 @@ export default function ChatPanel({ workspacePath, activeSkill, activeDesign, on
                 return
               }
               if (sending) {
-                const now = Date.now()
-                if (now - lastEscRef.current < 400) {
-                  e.preventDefault()
-                  handleAbort()
-                  lastEscRef.current = 0
-                } else {
-                  lastEscRef.current = now
-                }
+                e.preventDefault()
+                handleEscPress()
               }
               return
             }
@@ -834,9 +857,15 @@ export default function ChatPanel({ workspacePath, activeSkill, activeDesign, on
             {currentMode}
           </button>
 
-          <p className="flex-1 text-[10px]" style={{ color: 'var(--text-muted)' }}>
-            Tab · @ · Enter · Esc×2
-          </p>
+          {escWarning ? (
+            <p className="flex-1 text-[10px] font-medium" style={{ color: '#f97316' }}>
+              Press ESC again to stop
+            </p>
+          ) : (
+            <p className="flex-1 text-[10px]" style={{ color: 'var(--text-muted)' }}>
+              Tab · @ · Enter · Esc
+            </p>
+          )}
 
           {sending ? (
             <button

@@ -14,13 +14,13 @@
 :root {
   --bg-primary:    #FAF9F6;
   --bg-secondary:  #F0EEE8;
-  --bg-card:       #FFFFFF;
+  --bg-card:       rgba(255, 255, 255, 0.55);
   --text-primary:  #1A1916;
   --text-secondary:#6B6560;
   --text-muted:    #A09890;
   --accent:        #1A1916;
   --accent-2:      #6B6560;
-  --border:        #E2DED5;
+  --border:        rgba(226, 222, 213, 0.6);
   --border-strong: #C9C4B8;
 }
 
@@ -47,7 +47,7 @@ body::before {
   position: fixed;
   border-radius: 50%;
   filter: blur(60px);
-  opacity: 0.35;
+  opacity: 0.20;
   z-index: -2;
   pointer-events: none;
 }
@@ -65,7 +65,7 @@ body::before {
   width: 300px; height: 300px;
   background: #EE9526;
   top: 50%; left: 30%;
-  opacity: 0.25;
+  opacity: 0.15;
 }
 
 body::after {
@@ -139,17 +139,17 @@ body {
 }
 .slide-inner {
   width: 100%;
-  max-width: min(880px, calc(100dvh * 16 / 9));
+  max-width: min(1060px, calc(100dvh * 16 / 9));
   max-height: 100dvh;
   aspect-ratio: 16 / 9;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: clamp(2.5rem, 6vw, 6rem);
+  padding: clamp(1.5rem, 3vw, 3rem);
 }
 .slide-inner.wide {
-  max-width: min(1060px, calc(100dvh * 16 / 9));
+  max-width: min(1200px, calc(100dvh * 16 / 9));
 }
 
 /* ===========================================
@@ -233,15 +233,17 @@ h2 {
 }
 .card {
   background: var(--bg-card);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 12px;
   padding: clamp(1rem, 2vw, 1.5rem);
-  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
   transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 .card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.10);
 }
 .card-icon {
   width: 1.75rem; height: 1.75rem;
@@ -278,11 +280,13 @@ h2 {
 }
 .stat-card {
   background: var(--bg-card);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 12px;
   padding: clamp(1.5rem, 2.5vw, 2.5rem);
   text-align: center;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
   border-bottom: 2px solid var(--border-strong);
 }
 .stat-number {

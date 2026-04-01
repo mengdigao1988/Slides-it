@@ -72,8 +72,8 @@ body::after {
     position: fixed;
     width: 150%;
     height: 60%;
-    filter: blur(100px);
-    opacity: 0.4;
+    filter: blur(80px);
+    opacity: 0.6;
     animation: aurora-drift 25s ease-in-out infinite alternate;
     z-index: -1;
     pointer-events: none;
@@ -97,7 +97,7 @@ body::after {
     background: linear-gradient(90deg, #34d399 0%, transparent 40%);
     animation-duration: 22s;
     animation-delay: -5s;
-    opacity: 0.25;
+    opacity: 0.4;
 }
 @keyframes aurora-drift {
     0% { transform: translate(0, 0) scale(1); }
@@ -115,7 +115,7 @@ body::after {
                       radial-gradient(1px 1px at 40% 70%, white 50%, transparent),
                       radial-gradient(1.5px 1.5px at 60% 20%, white 50%, transparent),
                       radial-gradient(1px 1px at 80% 60%, white 50%, transparent);
-    opacity: 0.4;
+    opacity: 0.7;
     z-index: -1;
     pointer-events: none;
 }
@@ -125,9 +125,9 @@ body::after {
 
 - Full-viewport slides (`height: 100dvh`, `scroll-snap-align: start`)
 - 16:9 aspect ratio enforced via `.slide-inner`:
-  - Default: `max-width: min(960px, calc(100dvh * 16 / 9))` — for Cover, Quote, Closing
-  - Wide: `max-width: min(1120px, calc(100dvh * 16 / 9))` — for Feature Cards, Stats Row, Two-Column, Step Flow (add `.wide` class)
-- Generous padding: `clamp(2rem, 5vw, 5rem)`
+  - Default: `max-width: min(1060px, calc(100dvh * 16 / 9))` — for Cover, Quote, Closing
+  - Wide: `max-width: min(1200px, calc(100dvh * 16 / 9))` — for Feature Cards, Stats Row, Two-Column, Step Flow (add `.wide` class)
+- Generous padding: `clamp(1.5rem, 3vw, 3rem)`
 - Title slide: large centered heading + glowing accent line beneath
 - Content slides: heading top-left, content below with glassmorphism cards
 
@@ -169,7 +169,7 @@ body::after {
 ### Animations
 
 - **Entrance (default)**: `opacity: 0 → 1` + `translateY(24px → 0)`, duration `0.6s`, easing `cubic-bezier(0.16, 1, 0.3, 1)`
-- **Stagger delay**: `0.1s` per child element
+- **Stagger delay**: `0.1s` increments — delays: `0s, 0.1s, 0.1s, 0.2s, 0.3s, 0.4s` (3rd child shares 2nd child's delay)
 - **Card hover**: smooth `transform` + `box-shadow` transition (0.3s)
 - **Progress bar**: thin `3px` line at top, gradient from `var(--accent)` to `var(--accent-2)`
 - Trigger all entrance animations via `.visible` class added via `IntersectionObserver`

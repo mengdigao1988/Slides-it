@@ -170,23 +170,23 @@ Follow these rules on every generation. They are non-negotiable.
   }
   .slide-inner {
       width: 100%;
-      max-width: min(960px, calc(100dvh * 16 / 9));
+      max-width: min(1060px, calc(100dvh * 16 / 9));
       max-height: 100dvh;
       aspect-ratio: 16 / 9;
-      padding: clamp(2rem, 5vw, 5rem);
+      padding: clamp(1.5rem, 3vw, 3rem);
   }
   .slide-inner.wide {
-      max-width: min(1120px, calc(100dvh * 16 / 9));
+      max-width: min(1200px, calc(100dvh * 16 / 9));
   }
   ```
-  Use `.slide-inner` (960px) for Cover, Quote, and Closing slides.
-  Use `.slide-inner.wide` (1120px) for multi-column layouts: Feature Cards,
+  Use `.slide-inner` (1060px) for Cover, Quote, and Closing slides.
+  Use `.slide-inner.wide` (1200px) for multi-column layouts: Feature Cards,
   Stats Row, Two-Column, and Step Flow.
 - All colors and sizes via **CSS custom properties** on `:root` — never hardcode
 - All typography and spacing **must** use `clamp()`:
   ```css
   --title-size: clamp(2rem, 5.5vw, 4.5rem);
-  --slide-padding: clamp(2rem, 5vw, 5rem);
+  --slide-padding: clamp(1.5rem, 3vw, 3rem);
   ```
 - Fonts from Fontshare or Google Fonts — never system fonts
 - Animations triggered by `.visible` class (added by JS via IntersectionObserver)
