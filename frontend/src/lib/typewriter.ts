@@ -50,7 +50,6 @@ export interface ChatMessage {
     answers: string[][]
     questions: QuestionInfo[]
   }
-  attachmentNames?: string[]    // @ referenced file names, shown as badges
   todos?: TodoItem[]            // populated when role === 'todos'
   compact?: boolean             // true = replay compaction separator (role === 'system')
 }

@@ -707,25 +707,19 @@ export default function ChatPanel({ workspacePath, activeSkill, activeDesign, on
     setInput('')
     resize()
 
-    // All @ references → append file paths to message text.
-    // The AI decides how to read each file type based on SKILL.md:
-    //   - Images: AI uses `read` tool (OpenCode returns base64 vision attachment)
-    //   - Documents (PDF/Excel/Word/PPT/CSV): AI calls /api/documents/extract
-    //   - Text/code: AI uses `read` tool directly
+    // Only include paths for [@name] tags that still exist in the text.
+    // (User may have deleted some tags after inserting them.)
+    const refsInText = atReferences.filter((r) => text.includes(`[@${r.name}]`))
     let textWithRefs = text
-    if (atReferences.length > 0) {
-      const pathList = atReferences.map((r) => r.path).join('\n')
+    if (refsInText.length > 0) {
+      const pathList = refsInText.map((r) => r.path).join('\n')
       textWithRefs = text + '\n\n' + pathList
-      setAtReferences([])
     }
-
-    // Build display text (show @ refs in bubble)
-    const attachmentNames = atReferences.map((r) => r.name)
+    setAtReferences([])
 
     const userMsg: ChatMessage = {
       id: `u-${Date.now()}`, role: 'user', text, streaming: false,
       error: null, timestamp: new Date(), tools: [],
-      attachmentNames: attachmentNames.length > 0 ? attachmentNames : undefined,
     }
     setMessages((prev) => [...prev, userMsg])
     setSending(true)
@@ -885,47 +879,43 @@ export default function ChatPanel({ workspacePath, activeSkill, activeDesign, on
   function handleAtSelect(path: string, name: string) {
     const el = textareaRef.current
     if (!el) return
-    const pos = el.selectionStart ?? input.length
+    // Replace the @query text with [@filename] tag
     const before = input.slice(0, atStartPos)
+    const pos = el.selectionStart ?? input.length
     const after = input.slice(pos)
-    const newVal = `${before}@${name} ${after}`
+    const tag = `[@${name}]`
+    const newVal = `${before}${tag} ${after}`
     setInput(newVal)
     setAtQuery(null)
     setAtReferences((prev) => {
-      // Avoid duplicates
       if (prev.find((r) => r.path === path)) return prev
       return [...prev, { path, name }]
     })
-    // Restore focus + cursor after @name
     requestAnimationFrame(() => {
       el.focus()
-      const newPos = before.length + name.length + 2 // "@name "
+      const newPos = before.length + tag.length + 1
       el.setSelectionRange(newPos, newPos)
     })
-  }
-
-  function removeAtReference(path: string) {
-    setAtReferences((prev) => prev.filter((r) => r.path !== path))
   }
 
   /**
    * Handle paste events on the textarea.
    * If the clipboard contains image files (e.g. a screenshot via Cmd+V or
    * drag-and-drop from another app), upload them to the workspace and inject
-   * @filename references so the AI receives their file paths.
+   * [@filename] tags into the text so the AI receives their file paths.
    * Plain-text paste falls through to the browser default.
    */
   async function handlePaste(e: React.ClipboardEvent<HTMLTextAreaElement>) {
     const items = Array.from(e.clipboardData.items)
     const imageItems = items.filter((item) => item.kind === 'file' && item.type.startsWith('image/'))
     if (imageItems.length === 0) return  // plain text — let browser handle it
+    if (!workspacePath) return            // no workspace — can't upload
 
     e.preventDefault()
     const files: File[] = []
     for (const item of imageItems) {
       const file = item.getAsFile()
       if (file) {
-        // Give the file a meaningful name if it has none (e.g. "image.png")
         const name = file.name && file.name !== 'image.png'
           ? file.name
           : `pasted-${Date.now()}.png`
@@ -936,18 +926,32 @@ export default function ChatPanel({ workspacePath, activeSkill, activeDesign, on
 
     try {
       const { uploaded } = await uploadFiles(files)
-      // Inject @filename badges for each uploaded image
+      // Insert [@filename] tags at cursor position for each uploaded file
+      const el = textareaRef.current
+      if (!el) return
+      const pos = el.selectionStart ?? input.length
+      const before = input.slice(0, pos)
+      const after = input.slice(pos)
+      const tags = uploaded.map((f) => `[@${f}]`).join(' ')
+      const newVal = `${before}${tags} ${after}`
+      setInput(newVal)
+
       for (const filename of uploaded) {
+        const fullPath = `${workspacePath}/${filename}`
         setAtReferences((prev) => {
-          // The server saves to workspace root; we need the full path.
-          // workspacePath is available in the outer component scope.
-          const fullPath = `${workspacePath}/${filename}`
           if (prev.find((r) => r.path === fullPath)) return prev
           return [...prev, { path: fullPath, name: filename }]
         })
       }
-    } catch {
-      // Upload failed silently — don't block the user
+
+      requestAnimationFrame(() => {
+        el.focus()
+        const newPos = before.length + tags.length + 1
+        el.setSelectionRange(newPos, newPos)
+        resize()
+      })
+    } catch (err) {
+      setChatError(`File upload failed: ${(err as Error).message}`)
     }
   }
 
@@ -962,32 +966,6 @@ export default function ChatPanel({ workspacePath, activeSkill, activeDesign, on
           onSelect={handleAtSelect}
           onClose={() => setAtQuery(null)}
         />
-      )}
-
-      {/* @ reference badges */}
-      {atReferences.length > 0 && (
-        <div className="flex flex-wrap gap-1 mb-1.5">
-          {atReferences.map((ref) => (
-            <span
-              key={ref.path}
-              className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded"
-              style={{
-                background: 'rgba(99,102,241,0.1)',
-                border: '1px solid rgba(99,102,241,0.25)',
-                color: '#6366f1',
-              }}
-            >
-              📎 {ref.name}
-              <button
-                onClick={() => removeAtReference(ref.path)}
-                className="ml-0.5 opacity-60 hover:opacity-100 transition-opacity"
-                tabIndex={-1}
-              >
-                ×
-              </button>
-            </span>
-          ))}
-        </div>
       )}
 
       {/* Input card */}
@@ -1357,6 +1335,23 @@ export default function ChatPanel({ workspacePath, activeSkill, activeDesign, on
   )
 }
 
+// ── Helpers ────────────────────────────────────────────────────────────────
+
+/** Render user message text with [@filename] tags displayed as bold inline labels. */
+function renderUserText(text: string): React.ReactNode {
+  // Split on [@...] patterns, keeping the delimiters
+  const parts = text.split(/(\[@[^\]]+\])/)
+  if (parts.length === 1) return text  // no tags — fast path
+  return parts.map((part, i) => {
+    if (/^\[@[^\]]+\]$/.test(part)) {
+      return (
+        <strong key={i} style={{ color: '#6366f1' }}>{part}</strong>
+      )
+    }
+    return part
+  })
+}
+
 // ── MessageBubble ──────────────────────────────────────────────────────────
 function MessageBubble({
   msg,
@@ -1370,7 +1365,6 @@ function MessageBubble({
   onQuestionReject: (requestId: string) => void
 }) {
   const isUser = msg.role === 'user'
-  const attachments = (msg as ChatMessage & { attachmentNames?: string[] }).attachmentNames
   const [thinkingOpen, setThinkingOpen] = useState(false)
 
   // Todos bubble — render the dedicated TodoBubble component
@@ -1409,25 +1403,6 @@ function MessageBubble({
           {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
         </span>
       </div>
-
-      {/* @ attachment badges */}
-      {attachments && attachments.length > 0 && (
-        <div className="flex flex-wrap gap-1 mb-1.5">
-          {attachments.map((name) => (
-            <span
-              key={name}
-              className="text-[10px] px-2 py-0.5 rounded"
-              style={{
-                background: 'rgba(99,102,241,0.1)',
-                border: '1px solid rgba(99,102,241,0.2)',
-                color: '#6366f1',
-              }}
-            >
-              📎 {name}
-            </span>
-          ))}
-        </div>
-      )}
 
       {/* Thinking/reasoning block (folded by default) */}
       {msg.thinking && (
@@ -1497,7 +1472,7 @@ function MessageBubble({
         null
       ) : isUser ? (
         <p className="text-sm whitespace-pre-wrap leading-relaxed" style={{ color: 'var(--text-primary)' }}>
-          {msg.text}
+          {renderUserText(msg.text)}
         </p>
       ) : (
         <Suspense fallback={
