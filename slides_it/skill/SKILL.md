@@ -375,15 +375,9 @@ Only add if user said **Yes** in Phase 1. Implementation: JS-based hover with
 
 ### Visual Quality Rules
 
-**Layout Diversity** — choose the layout based on content type, never default to a bullet list:
-
-| Content type | Layout |
-|---|---|
-| Key metrics / data | Stat card row (large number + label) |
-| Process / steps | Horizontal step flow with numbered circles |
-| Comparison / contrast | Two-column or 2×2 matrix |
-| Key insight / quote | Large quote block with accent border |
-| Features / items | Card grid (2–3 columns) |
+**Layout Diversity** — choose the layout based on content type, never default
+to a bullet list. The active design's **Content Mapping Guide** defines which
+layout variant to use for each content pattern — always consult it first.
 
 The active design's **Slide Layout Variants** section defines the exact HTML/CSS
 patterns for each layout. Follow them precisely.

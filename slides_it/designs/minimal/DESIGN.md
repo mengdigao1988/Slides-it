@@ -241,6 +241,80 @@ loaded via CDN:
 - Responsive: charts are inside the 1920×1080 canvas, scaled by JS `transform: scale()` —
   no need for ECharts `resize()` handling
 
+### Content Mapping Guide
+
+Use this table to decide which layout variant fits the content. When a content
+pattern does not appear below, pick the closest match or combine layouts.
+
+| Content Pattern | Recommended Layout | Minimal Notes |
+|---|---|---|
+| 3–4 parallel items with titles | Feature Cards (3-col) | Number labels (`01`, `02`) preferred. Icon optional in `var(--accent-2)`. |
+| Key metrics / KPIs (2–4 numbers) | Stats Row | Static numbers with fade-in, no counter animation. DM Serif Display. |
+| Argument + supporting evidence | Two-Column | Left: serif heading + sans body, Right: frosted-glass card with em-dash bullets |
+| Sequential process (3–5 steps) | Step Flow | Filled dark circles, `1px` connectors. Quiet and structural. |
+| Memorable quote or key takeaway | Quote Block | DM Serif Display italic, `border-left: 2px`. Let typography speak. |
+| Quantitative breakdown (proportions) | Two-Column + ECharts donut | Monochrome warm palette. `animation: false`. |
+| Timeline / milestones | Step Flow | Circles as year/date markers. Minimal connector lines. |
+| Team / people (3–4 members) | Feature Cards | No icons. card-title → name (serif), card-body → role/bio. |
+| Before vs After / Pros vs Cons | Two-Column | Each side: serif heading + em-dash evidence list |
+| 6+ items on one topic | Split across 2 slides | Max 4 items per slide (stricter than other themes). |
+| Table of Contents / Agenda | Numbered list with serif headings | No cards needed — typography creates the hierarchy. |
+
+#### Emphasis usage
+
+- Use *italic* (`<em>`) on the single most important phrase in a title — never
+  bold, never color, never gradient.
+- Typical targets: the core concept (`clear presentation`), the key insight
+  (`nothing left to take away`).
+- Maximum one emphasized phrase per slide.
+
+#### Dividers and rules
+
+- `<hr class="divider">` (full width, `1px`): structural — separate heading from
+  content, or content section from another.
+- `<hr class="divider-wide">` (`300px`): decorative anchor — place at bottom of
+  sparse slides or between a quote and its attribution.
+- `heading-rule` (border-bottom on heading): use on content slide headings
+  (Feature Cards, Stats Row) to clearly separate the title from the body.
+- Never use gradient lines, colored borders, or thick rules.
+
+#### Icon selection
+
+- Icons are **optional** in this theme — typography and whitespace provide
+  the visual hierarchy.
+- When used, pick simple stroke-style Lucide icons in `var(--accent-2)`:
+  `circle-dashed` → restraint, `eye` → clarity, `text` → typography,
+  `book-open` → research, `target` → precision.
+- Feature Cards may include icons, but they are not required. Omitting icons
+  often feels more "minimal."
+- Stats Row, Quote Block, Step Flow: never add icons — let the numbers,
+  serif text, and circles carry the weight.
+
+#### Card labels
+
+- Sequential numbers (`01`, `02`, `03`) are the preferred style — they feel
+  orderly and typographic.
+- Short category words (`Restraint`, `Clarity`) are acceptable when items
+  are not naturally ordered.
+- Omit labels when the card-title is already self-explanatory.
+
+#### Decorative fills (deco-circle, deco-rule)
+
+- Sparse slides (Cover, Quote, Closing): 2–3 deco elements — warm-amber
+  circles (low opacity, blurred) and thin rules that span part of the canvas.
+- Dense slides (Cards, Stats, Two-Column, Step Flow): 0 deco elements —
+  content fills the canvas; decoration would be clutter.
+- Never exceed 3 deco elements on any single slide.
+
+#### Common Mistakes
+
+- Using colored accents, gradients, or glows → stay monochrome warm.
+- Adding icons to every card when the heading is already clear → less is more.
+- Using counter animations on numbers → minimal uses static numbers with fade-in.
+- Using more than 4 bullet points per slide → split across slides.
+- Adding decorative fills to dense content slides → content is the fill.
+- Leaving more than ~20 % of canvas visually empty → expand content or add thin rules.
+
 ### Code Blocks (if any)
 
 ```css

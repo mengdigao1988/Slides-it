@@ -259,6 +259,77 @@ loaded via CDN:
 - Responsive: charts are inside the 1920×1080 canvas, scaled by JS `transform: scale()` —
   no need for ECharts `resize()` handling
 
+### Content Mapping Guide
+
+Use this table to decide which layout variant fits the content. When a content
+pattern does not appear below, pick the closest match or combine layouts.
+
+| Content Pattern | Recommended Layout | Aurora Notes |
+|---|---|---|
+| 3–4 parallel items with titles | Feature Cards (3-col) | Each card: Lucide icon in `var(--accent)` + label + body text |
+| Key metrics / KPIs (2–4 numbers) | Stats Row | Counter animation from 0, `.gradient-text` on numbers |
+| Argument + supporting evidence | Two-Column | Left: narrative paragraphs, Right: glassmorphism evidence card |
+| Sequential process (3–5 steps) | Step Flow | Gradient circles (`--accent` → `--accent-2`), glowing connectors |
+| Memorable quote or key takeaway | Quote Block | `border-left: 3px`, text glow, large decorative `"` mark |
+| Single powerful statement / CTA | Full-bleed Dark Callout | Max once per deck. Large `.gradient-text`. Aurora ribbons more visible. |
+| Quantitative breakdown (proportions) | Two-Column + ECharts donut | Chart on one side, narrative on the other. Aurora triad colors. |
+| Timeline / milestones | Step Flow | Repurpose step circles as year/date markers |
+| Team / people (3–4 members) | Feature Cards | card-title → name, card-body → role/bio, icon optional |
+| Before vs After / Pros vs Cons | Two-Column | Each side: heading + evidence list with accent bullets |
+| 6+ items on one topic | Split across 2 slides | Maintain max 5 items per slide |
+| Table of Contents / Agenda | Feature Cards (no icons) | card-label → section number, card-title → section name, minimal body |
+
+#### Gradient-text usage
+
+- Apply `.gradient-text` to the 1–3 most important words in a title — never
+  entire sentences.
+- Typical targets: the key metric (`$4.2B`), the core concept
+  (`actually impress`), the CTA (`Get Started`).
+- Maximum one `.gradient-text` element per slide.
+
+#### Accent line vs divider
+
+- **accent-line** (gradient, short `48px`): decorative — place after headings to
+  anchor the eye downward.
+- **accent-line-wide** (gradient, long `200px`): decorative — place at bottom of
+  sparse slides as a visual anchor.
+- Use a plain CSS `border-bottom` or thin `<hr>` for structural separation
+  between content sections — not the gradient accent lines.
+
+#### Icon selection
+
+- Choose Lucide icons that represent the concept abstractly, not literally:
+  `sparkles` → innovation, `shield` → security, `zap` → performance,
+  `layers` → architecture, `globe` → global, `bar-chart` → data.
+- Every Feature Card should include a Lucide icon — it is the card's visual
+  anchor in this theme.
+- Stats Row and Quote Block: icons are optional — numbers and typography already
+  carry the visual weight.
+- When unsure, omit — a strong heading beats a generic icon.
+
+#### Card labels
+
+- Short category words (`Visual`, `Motion`, `Architecture`) for thematic grouping.
+- Sequential numbers (`01`, `02`, `03`) for ordered items.
+- Omit labels when the card-title is already self-explanatory.
+
+#### Decorative fills (deco-blob, deco-line)
+
+- Sparse slides (Cover, Quote, Closing): 2–3 deco elements to anchor the composition.
+- Dense slides (Cards, Stats, Two-Column, Step Flow): 0–1 deco elements — the
+  content itself fills the canvas.
+- Never exceed 3 deco elements on any single slide.
+
+#### Common Mistakes
+
+- Using Stats Row for non-numeric content → use Feature Cards instead.
+- Using bullet lists when Feature Cards or Step Flow would be clearer.
+- Putting both a chart AND a Stats Row on the same slide → pick one.
+- Applying `.gradient-text` to entire sentences → limit to 1–3 key words.
+- Adding Lucide icons to every element → reserve for Feature Cards and key callouts.
+- Using Full-bleed Dark Callout more than once → it loses its impact.
+- Leaving more than ~20 % of canvas visually empty → add decorative fills or expand content.
+
 ### Code Blocks (if any)
 
 ```css
