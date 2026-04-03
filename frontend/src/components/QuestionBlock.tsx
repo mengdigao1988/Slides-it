@@ -85,12 +85,12 @@ export default function QuestionBlock({
               background: 'var(--bg-sidebar)',
             }}
           >
-            <span className="text-[10px] mt-0.5 flex-shrink-0" style={{ color: 'var(--green-dot)' }}>✓</span>
+            <span className="text-[0.625rem] mt-0.5 flex-shrink-0" style={{ color: 'var(--green-dot)' }}>✓</span>
             <div className="min-w-0">
-              <p className="text-[11px] font-medium mb-0.5" style={{ color: 'var(--text-secondary)' }}>
+              <p className="text-[0.6875rem] font-medium mb-0.5" style={{ color: 'var(--text-secondary)' }}>
                 {q.header}
               </p>
-              <p className="text-[11px]" style={{ color: 'var(--text-primary)' }}>
+              <p className="text-[0.6875rem]" style={{ color: 'var(--text-primary)' }}>
                 {(answeredLabels[i] ?? []).join(', ') || '—'}
               </p>
             </div>
@@ -120,7 +120,7 @@ export default function QuestionBlock({
             }}
           >
             {/* Question header */}
-            <p className="text-[11px] font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>
+            <p className="text-[0.6875rem] font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>
               {q.header}
             </p>
 
@@ -149,7 +149,7 @@ export default function QuestionBlock({
                     <span
                       className="flex-shrink-0 mt-0.5"
                       style={{
-                        width: '12px', height: '12px',
+                        width: '0.75rem', height: '0.75rem',
                         borderRadius: isMultiple ? '3px' : '50%',
                         border: `1.5px solid ${selected ? 'var(--text-primary)' : 'var(--border-strong)'}`,
                         background: selected ? 'var(--text-primary)' : 'transparent',
@@ -171,7 +171,7 @@ export default function QuestionBlock({
                         {opt.label}
                       </span>
                       {opt.description && (
-                        <span className="text-[10px] leading-snug block" style={{ color: 'var(--text-muted)' }}>
+                        <span className="text-[0.625rem] leading-snug block" style={{ color: 'var(--text-muted)' }}>
                           {opt.description}
                         </span>
                       )}
@@ -212,7 +212,7 @@ export default function QuestionBlock({
       >
         <button
           onClick={() => onReject(question.id)}
-          className="text-[11px] transition-colors"
+          className="text-[0.6875rem] transition-colors"
           style={{ color: 'var(--text-muted)', fontFamily: 'inherit' }}
           onMouseEnter={e => (e.currentTarget.style.color = 'var(--text-secondary)')}
           onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-muted)')}

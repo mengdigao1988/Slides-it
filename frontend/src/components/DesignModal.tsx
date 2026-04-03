@@ -131,8 +131,8 @@ export default function DesignModal({
       <div
         className="flex rounded-2xl overflow-hidden shadow-2xl"
         style={{
-          width: 'min(900px, 92vw)',
-          height: 'min(600px, 88vh)',
+          width: 'min(56.25rem, 92vw)',
+          height: 'min(37.5rem, 88vh)',
           background: 'var(--bg-surface)',
           border: '1px solid var(--border)',
         }}
@@ -141,7 +141,7 @@ export default function DesignModal({
         <div
           className="flex flex-col flex-shrink-0 overflow-hidden"
           style={{
-            width: '260px',
+            width: '16.25rem',
             borderRight: '1px solid var(--border)',
             background: 'var(--bg-sidebar)',
           }}
@@ -194,14 +194,14 @@ export default function DesignModal({
                     </span>
                     {design.active && (
                       <span
-                        className="text-[9px] px-1.5 py-0.5 rounded font-medium"
+                        className="text-[0.5625rem] px-1.5 py-0.5 rounded font-medium"
                         style={{ background: 'var(--bg-hover)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}
                       >
                         active
                       </span>
                     )}
                   </div>
-                  <p className="text-[11px] leading-snug truncate" style={{ color: 'var(--text-muted)' }}>
+                  <p className="text-[0.6875rem] leading-snug truncate" style={{ color: 'var(--text-muted)' }}>
                     {design.description || 'No description'}
                   </p>
                 </button>
@@ -231,7 +231,7 @@ export default function DesignModal({
             className="flex-shrink-0 p-3"
             style={{ borderTop: '1px solid var(--border)' }}
           >
-            <p className="text-[10px] uppercase tracking-wider mb-1.5" style={{ color: 'var(--text-muted)' }}>
+            <p className="text-[0.625rem] uppercase tracking-wider mb-1.5" style={{ color: 'var(--text-muted)' }}>
               Install from URL
             </p>
             <div className="flex gap-1.5">
@@ -264,7 +264,7 @@ export default function DesignModal({
               </button>
             </div>
             {installError && (
-              <p className="mt-1.5 text-[10px]" style={{ color: 'var(--error)' }}>
+              <p className="mt-1.5 text-[0.625rem]" style={{ color: 'var(--error)' }}>
                 {installError}
               </p>
             )}
@@ -290,7 +290,7 @@ export default function DesignModal({
                 </div>
                 <div className="flex items-center gap-2">
                   {actionError && (
-                    <span className="text-[11px]" style={{ color: 'var(--error)' }}>
+                    <span className="text-[0.6875rem]" style={{ color: 'var(--error)' }}>
                       {actionError}
                     </span>
                   )}

@@ -20,10 +20,10 @@ export default function TodoBubble({ todos, timestamp }: TodoBubbleProps) {
           className="w-1.5 h-1.5 rounded-full flex-shrink-0"
           style={{ background: 'var(--green-dot)' }}
         />
-        <span className="text-[10px] font-medium" style={{ color: 'var(--text-muted)', fontFamily: 'inherit' }}>
+        <span className="text-[0.625rem] font-medium" style={{ color: 'var(--text-muted)', fontFamily: 'inherit' }}>
           todos
         </span>
-        <span className="text-[10px]" style={{ color: 'var(--text-muted)', fontFamily: 'inherit' }}>
+        <span className="text-[0.625rem]" style={{ color: 'var(--text-muted)', fontFamily: 'inherit' }}>
           {timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
         </span>
       </div>

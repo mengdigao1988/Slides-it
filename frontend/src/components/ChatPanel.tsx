@@ -982,7 +982,7 @@ export default function ChatPanel({ workspacePath, activeSkill, activeDesign, on
           rows={1}
           placeholder="Describe your presentation… @ to reference files"
           className="w-full bg-transparent px-4 pt-3.5 pb-2 text-sm resize-none outline-none"
-          style={{ maxHeight: '160px', color: 'var(--text-primary)', fontFamily: 'inherit' }}
+          style={{ maxHeight: '10rem', color: 'var(--text-primary)', fontFamily: 'inherit' }}
           onCompositionStart={() => setIsComposing(true)}
           onCompositionEnd={() => setIsComposing(false)}
           onChange={(e) => setInput(e.target.value)}
@@ -1020,7 +1020,7 @@ export default function ChatPanel({ workspacePath, activeSkill, activeDesign, on
           {/* Mode pill */}
           <button
             onClick={() => setCurrentMode((m) => m === 'build' ? 'plan' : 'build')}
-            className="flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium transition-colors flex-shrink-0"
+            className="flex items-center gap-1 px-2 py-0.5 rounded text-[0.625rem] font-medium transition-colors flex-shrink-0"
             style={currentMode === 'plan' ? {
               background: 'rgba(59,130,246,0.12)',
               border: '1px solid rgba(59,130,246,0.3)',
@@ -1047,11 +1047,11 @@ export default function ChatPanel({ workspacePath, activeSkill, activeDesign, on
           </button>
 
           {escWarning ? (
-            <p className="flex-1 text-[10px] font-medium" style={{ color: '#f97316' }}>
+            <p className="flex-1 text-[0.625rem] font-medium" style={{ color: '#f97316' }}>
               Press ESC again to stop
             </p>
           ) : (
-            <p className="flex-1 text-[10px]" style={{ color: 'var(--text-muted)' }}>
+            <p className="flex-1 text-[0.625rem]" style={{ color: 'var(--text-muted)' }}>
               Tab · @ · Enter · Esc
             </p>
           )}
@@ -1093,7 +1093,7 @@ export default function ChatPanel({ workspacePath, activeSkill, activeDesign, on
   const designButton = onDesignChange ? (
     <button
       onClick={() => setDesignModalOpen(true)}
-      className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] transition-colors"
+      className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[0.6875rem] transition-colors"
       style={{
         color: 'var(--text-muted)',
         border: '1px solid var(--border)',
@@ -1116,7 +1116,7 @@ export default function ChatPanel({ workspacePath, activeSkill, activeDesign, on
     <div className="relative" ref={industryDropdownRef}>
       <button
         onClick={() => setIndustryOpen((o) => !o)}
-        className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] transition-colors"
+        className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[0.6875rem] transition-colors"
         style={{
           color: activeIndustry && activeIndustry !== 'general' ? '#6366f1' : 'var(--text-muted)',
           border: activeIndustry && activeIndustry !== 'general'
@@ -1135,7 +1135,7 @@ export default function ChatPanel({ workspacePath, activeSkill, activeDesign, on
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
             d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
         </svg>
-        <span className="truncate max-w-[140px]">
+        <span className="truncate max-w-[8.75rem]">
           {activeIndustry || 'general'}
         </span>
         <svg
@@ -1154,15 +1154,15 @@ export default function ChatPanel({ workspacePath, activeSkill, activeDesign, on
             background: 'var(--bg-surface)',
             border: '1px solid var(--border)',
             boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-            minWidth: '220px',
-            maxHeight: '260px',
+            minWidth: '14rem',
+            maxHeight: '16.25rem',
           }}
         >
           {industries.map((ind) => (
             <button
               key={ind.name}
               onClick={() => handleIndustrySelect(ind.name)}
-              className="w-full text-left px-3 py-1.5 text-[11px] transition-colors flex items-center gap-2"
+              className="w-full text-left px-3 py-1.5 text-[0.6875rem] transition-colors flex items-center gap-2"
               style={{
                 color: ind.name === activeIndustry ? 'var(--text-primary)' : 'var(--text-secondary)',
                 fontWeight: ind.name === activeIndustry ? 500 : 400,
@@ -1176,7 +1176,7 @@ export default function ChatPanel({ workspacePath, activeSkill, activeDesign, on
               }
               <span className="flex-1 truncate">{ind.name}</span>
               {ind.description && (
-                <span className="text-[9px] truncate max-w-[120px]" style={{ color: 'var(--text-muted)' }}>
+                <span className="text-[0.5625rem] truncate max-w-[7.5rem]" style={{ color: 'var(--text-muted)' }}>
                   {ind.description}
                 </span>
               )}
@@ -1191,7 +1191,7 @@ export default function ChatPanel({ workspacePath, activeSkill, activeDesign, on
   const modelPill = (
     <button
       onClick={() => setModelModalOpen(true)}
-      className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] transition-colors"
+      className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[0.6875rem] transition-colors"
       style={{
         color: 'var(--text-muted)',
         border: '1px solid var(--border)',
@@ -1205,7 +1205,7 @@ export default function ChatPanel({ workspacePath, activeSkill, activeDesign, on
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
           d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
       </svg>
-      <span className="truncate max-w-[180px]">
+      <span className="truncate max-w-[11.25rem]">
         {currentModel ? currentModel.split('/').pop() : 'default model'}
       </span>
     </button>
@@ -1219,7 +1219,7 @@ export default function ChatPanel({ workspacePath, activeSkill, activeDesign, on
         background: 'var(--error-bg)',
         border: '1px solid var(--error-border)',
         color: 'var(--error)',
-        maxWidth: '360px',
+        maxWidth: '22.5rem',
         textAlign: 'center',
       }}
     >
@@ -1269,7 +1269,7 @@ export default function ChatPanel({ workspacePath, activeSkill, activeDesign, on
               slides-it
             </span>
           </div>
-          <div style={{ width: '100%', maxWidth: '560px' }}>
+          <div style={{ width: '100%', maxWidth: '35rem' }}>
             {inputBox}
             <div className="mt-2 flex justify-start gap-2">
               {industryPill}
@@ -1377,7 +1377,7 @@ function MessageBubble({
     return (
       <div className="flex items-center gap-3 py-3 px-4">
         <div className="flex-1 h-px" style={{ background: 'var(--border)' }} />
-        <span className="text-[11px] whitespace-nowrap" style={{ color: 'var(--text-muted)' }}>
+        <span className="text-[0.6875rem] whitespace-nowrap" style={{ color: 'var(--text-muted)' }}>
           {msg.error ?? msg.text}
         </span>
         <div className="flex-1 h-px" style={{ background: 'var(--border)' }} />
@@ -1396,10 +1396,10 @@ function MessageBubble({
           className="w-1.5 h-1.5 rounded-full flex-shrink-0"
           style={{ background: isUser ? 'var(--text-secondary)' : 'var(--green-dot)' }}
         />
-        <span className="text-[10px] font-medium" style={{ color: 'var(--text-muted)' }}>
+        <span className="text-[0.625rem] font-medium" style={{ color: 'var(--text-muted)' }}>
           {isUser ? 'you' : 'agent'}
         </span>
-        <span className="text-[10px]" style={{ color: 'var(--text-muted)' }}>
+        <span className="text-[0.625rem]" style={{ color: 'var(--text-muted)' }}>
           {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
         </span>
       </div>
@@ -1409,7 +1409,7 @@ function MessageBubble({
         <div className="mb-2">
           <button
             onClick={() => setThinkingOpen((o) => !o)}
-            className="flex items-center gap-1.5 text-[11px] transition-colors mb-1"
+            className="flex items-center gap-1.5 text-[0.6875rem] transition-colors mb-1"
             style={{ color: 'var(--text-muted)', fontFamily: 'inherit' }}
             onMouseEnter={e => (e.currentTarget.style.color = 'var(--text-secondary)')}
             onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-muted)')}
@@ -1425,12 +1425,12 @@ function MessageBubble({
           </button>
           {thinkingOpen && (
             <div
-              className="text-[11px] leading-relaxed px-3 py-2 rounded-lg overflow-y-auto"
+              className="text-[0.6875rem] leading-relaxed px-3 py-2 rounded-lg overflow-y-auto"
               style={{
                 background: 'var(--bg-sidebar)',
                 border: '1px solid var(--border)',
                 color: 'var(--text-muted)',
-                maxHeight: '200px',
+                maxHeight: '12.5rem',
                 whiteSpace: 'pre-wrap',
               }}
             >

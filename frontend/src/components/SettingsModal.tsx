@@ -204,7 +204,7 @@ export default function SettingsModal({ onClose, onSettingsSaved }: SettingsModa
                 )}
               </button>
             </div>
-            <p className="text-[11px]" style={{ color: 'var(--text-muted)' }}>
+            <p className="text-[0.6875rem]" style={{ color: 'var(--text-muted)' }}>
               Leave empty to use opencode free tier (opencode/big-pickle etc.)
             </p>
           </div>
@@ -231,7 +231,7 @@ export default function SettingsModal({ onClose, onSettingsSaved }: SettingsModa
                 fontFamily: 'inherit',
               }}
             />
-            <p className="text-[11px]" style={{ color: 'var(--text-muted)' }}>
+            <p className="text-[0.6875rem]" style={{ color: 'var(--text-muted)' }}>
               Optional for built-in providers. Required for custom.
             </p>
           </div>
@@ -256,7 +256,7 @@ export default function SettingsModal({ onClose, onSettingsSaved }: SettingsModa
                   fontFamily: 'inherit',
                 }}
               />
-              <p className="text-[11px]" style={{ color: 'var(--text-muted)' }}>
+              <p className="text-[0.6875rem]" style={{ color: 'var(--text-muted)' }}>
                 Registers this model ID for the custom provider in opencode.json.
               </p>
             </div>
@@ -264,7 +264,7 @@ export default function SettingsModal({ onClose, onSettingsSaved }: SettingsModa
 
           {/* Info note */}
           <p
-            className="text-[11px] px-3 py-2 rounded-lg"
+            className="text-[0.6875rem] px-3 py-2 rounded-lg"
             style={{
               color: 'var(--text-muted)',
               background: 'var(--bg-app)',

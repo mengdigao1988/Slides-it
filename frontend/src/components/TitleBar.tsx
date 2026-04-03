@@ -37,7 +37,7 @@ export default function TitleBar({
           slides-it
         </span>
         {agentVersion && (
-          <span className="text-[11px]" style={{ color: 'var(--text-muted)' }}>
+          <span className="text-[0.6875rem]" style={{ color: 'var(--text-muted)' }}>
             v{agentVersion}
           </span>
         )}

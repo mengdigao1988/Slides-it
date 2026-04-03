@@ -128,7 +128,7 @@ export default function ModelModal({
           background: 'var(--bg-surface)',
           border: '1px solid var(--border)',
           boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
-          width: '520px',
+          width: '32.5rem',
           maxWidth: '95vw',
           maxHeight: '70vh',
         }}
@@ -145,7 +145,7 @@ export default function ModelModal({
           </span>
           <button
             onClick={onClose}
-            className="text-[11px] transition-colors"
+            className="text-[0.6875rem] transition-colors"
             style={{ color: 'var(--text-muted)', fontFamily: 'inherit' }}
             onMouseEnter={e => (e.currentTarget.style.color = 'var(--text-secondary)')}
             onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-muted)')}
@@ -176,7 +176,7 @@ export default function ModelModal({
             {search && (
               <button
                 onClick={() => setSearch('')}
-                className="text-[10px]"
+                className="text-[0.625rem]"
                 style={{ color: 'var(--text-muted)' }}
               >
                 ✕
@@ -188,7 +188,7 @@ export default function ModelModal({
         {/* ── Model list ── */}
         <div ref={listRef} className="flex-1 overflow-y-auto py-2">
           {groups.length === 0 && (
-            <p className="text-[11px] px-5 py-4 text-center" style={{ color: 'var(--text-muted)' }}>
+            <p className="text-[0.6875rem] px-5 py-4 text-center" style={{ color: 'var(--text-muted)' }}>
               No models found
             </p>
           )}
@@ -197,7 +197,7 @@ export default function ModelModal({
             <div key={group.provider}>
               {/* Provider heading */}
               <p
-                className="px-5 pt-3 pb-1 text-[10px] font-semibold uppercase tracking-wider"
+                className="px-5 pt-3 pb-1 text-[0.625rem] font-semibold uppercase tracking-wider"
                 style={{ color: '#EA580C' }}
               >
                 {group.title}
@@ -226,7 +226,7 @@ export default function ModelModal({
 
                     {/* Model name */}
                     <span
-                      className="text-[13px] flex-1 truncate"
+                      className="text-[0.8125rem] flex-1 truncate"
                       style={{
                         color: isCurrent ? 'var(--text-primary)' : 'var(--text-secondary)',
                         fontWeight: isCurrent ? 500 : 400,
@@ -237,7 +237,7 @@ export default function ModelModal({
 
                     {/* Provider badge (only when searching across groups) */}
                     {q && (
-                      <span className="text-[10px] flex-shrink-0" style={{ color: 'var(--text-muted)' }}>
+                      <span className="text-[0.625rem] flex-shrink-0" style={{ color: 'var(--text-muted)' }}>
                         {providerTitle(providerOf(m))}
                       </span>
                     )}

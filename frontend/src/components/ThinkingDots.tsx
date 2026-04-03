@@ -36,7 +36,7 @@ export default function ThinkingDots({ toolName }: ThinkingDotsProps) {
           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3-3-3-3V4a10 10 0 100 20v-2a8 8 0 01-8-8z" />
         </svg>
-        <span className="text-[11px]" style={{ color: 'var(--text-muted)' }}>
+        <span className="text-[0.6875rem]" style={{ color: 'var(--text-muted)' }}>
           {toolLabel(toolName)}
         </span>
       </span>

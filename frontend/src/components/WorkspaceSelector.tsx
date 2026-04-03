@@ -152,7 +152,7 @@ export default function WorkspaceSelector({ onReady }: WorkspaceSelectorProps) {
 
         {/* Quick access */}
         <div className="px-4 py-2 flex items-center gap-1.5 flex-shrink-0" style={{ borderBottom: '1px solid var(--border)' }}>
-          <span className="text-[10px] uppercase tracking-wider mr-1" style={{ color: 'var(--text-muted)' }}>
+          <span className="text-[0.625rem] uppercase tracking-wider mr-1" style={{ color: 'var(--text-muted)' }}>
             Quick
           </span>
           {QUICK_ACCESS.map((q) => (

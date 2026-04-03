@@ -29,6 +29,15 @@
    ===================================================== */
 * { box-sizing: border-box; }
 
+html {
+  /* Fluid root font-size: scales up on larger viewports so the entire
+     rem-based UI stays comfortable on 4K / 5K displays.
+     – 1440px viewport → 16px (normal)
+     – 2560px viewport → 22px (cap)
+     – 5120px viewport → 22px (cap)                                    */
+  font-size: clamp(16px, 1.1vw, 22px);
+}
+
 body {
   background: var(--bg-app);
   color: var(--text-primary);

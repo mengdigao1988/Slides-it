@@ -49,7 +49,7 @@ _LS_IGNORE: set[str] = {
 # MCP config block for open-webSearch — always injected into opencode.json
 _MCP_WEB_SEARCH_BLOCK: dict = {
     "type": "local",
-    "command": ["npx", "open-websearch@latest"],
+    "command": ["open-websearch"],
     "environment": {
         "MODE": "stdio",
         "DEFAULT_SEARCH_ENGINE": "bing",

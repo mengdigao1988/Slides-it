@@ -102,7 +102,7 @@ function ContextMenu({ menu, onClose, onOpen, onCopyPath, onCopyName, onRename, 
     width: '100%',
     textAlign: 'left',
     padding: '5px 12px',
-    fontSize: '11px',
+    fontSize: '0.6875rem',
     color: 'var(--text-secondary)',
     background: 'transparent',
     border: 'none',
@@ -145,7 +145,7 @@ function ContextMenu({ menu, onClose, onOpen, onCopyPath, onCopyName, onRename, 
         borderRadius: '8px',
         boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
         padding: '4px',
-        minWidth: '180px',
+        minWidth: '11.25rem',
       }}
     >
       {isFile && (
@@ -227,7 +227,7 @@ function DeleteConfirm({ node, onConfirm, onCancel }: {
           border: '1px solid var(--border)',
           borderRadius: '12px',
           padding: '20px 24px',
-          maxWidth: '360px',
+          maxWidth: '22.5rem',
           width: '90%',
           boxShadow: '0 16px 40px rgba(0,0,0,0.2)',
         }}
@@ -498,7 +498,7 @@ export default function FileTree({ workspacePath, refreshToken, onFileClick }: F
         style={{ borderBottom: '1px solid var(--border)' }}
       >
         <span
-          className="text-[10px] font-mono truncate flex-1"
+          className="text-[0.625rem] font-mono truncate flex-1"
           style={{ color: 'var(--text-muted)' }}
           title={workspacePath}
         >
@@ -599,7 +599,7 @@ export default function FileTree({ workspacePath, refreshToken, onFileClick }: F
       {isDragOver && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
           <div
-            className="text-[11px] font-medium px-3 py-2 rounded-lg"
+            className="text-[0.6875rem] font-medium px-3 py-2 rounded-lg"
             style={{
               color: 'var(--btn-send)',
               border: '1.5px dashed var(--btn-send)',
@@ -614,7 +614,7 @@ export default function FileTree({ workspacePath, refreshToken, onFileClick }: F
       {/* Toast feedback */}
       {toast && (
         <div
-          className="absolute bottom-3 left-1/2 -translate-x-1/2 text-[10px] px-2.5 py-1 rounded-lg pointer-events-none z-50"
+          className="absolute bottom-3 left-1/2 -translate-x-1/2 text-[0.625rem] px-2.5 py-1 rounded-lg pointer-events-none z-50"
           style={{
             background: 'var(--bg-surface)',
             border: '1px solid var(--border)',
@@ -629,12 +629,12 @@ export default function FileTree({ workspacePath, refreshToken, onFileClick }: F
       {/* Tree */}
       <div className="flex-1 overflow-y-auto py-1">
         {error && (
-          <p className="text-[10px] px-3 py-2" style={{ color: 'var(--error)' }}>
+          <p className="text-[0.625rem] px-3 py-2" style={{ color: 'var(--error)' }}>
             {error}
           </p>
         )}
         {!error && roots.length === 0 && workspacePath && (
-          <p className="text-[10px] px-3 py-4 text-center" style={{ color: 'var(--text-muted)' }}>
+          <p className="text-[0.625rem] px-3 py-4 text-center" style={{ color: 'var(--text-muted)' }}>
             Empty folder
           </p>
         )}
@@ -718,7 +718,7 @@ function TreeNode({
         onContextMenu={(e) => onContextMenu(e, node)}
       >
         <button
-          style={{ paddingLeft: `${4 + depth * 12}px` }}
+          style={{ paddingLeft: `${0.25 + depth * 0.75}rem` }}
           className="flex items-center gap-1.5 w-full text-left px-1 py-0.5 rounded transition-colors"
           onClick={() => (isDir ? onToggleDir(node.path) : onFileClick?.(node.path))}
           onDoubleClick={() => {

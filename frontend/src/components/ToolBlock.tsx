@@ -62,10 +62,10 @@ function SubtaskBlock({ tool }: ToolBlockProps) {
         style={{ background: 'transparent', cursor: 'pointer', fontFamily: 'inherit' }}
         onClick={() => setOpen((o) => !o)}
       >
-        <span className="font-mono text-[11px] flex-shrink-0 mt-px" style={{ color: 'var(--text-muted)' }}>
+        <span className="font-mono text-[0.6875rem] flex-shrink-0 mt-px" style={{ color: 'var(--text-muted)' }}>
           {isRunning ? '◌' : isError ? '✗' : '∴'}
         </span>
-        <span className="text-[11px] leading-relaxed min-w-0">
+        <span className="text-[0.6875rem] leading-relaxed min-w-0">
           <span className="font-medium" style={{ color: 'var(--text-secondary)' }}>
             {agentLabel(agent)}
           </span>
@@ -76,7 +76,7 @@ function SubtaskBlock({ tool }: ToolBlockProps) {
           )}
         </span>
         {isRunning && (
-          <span className="text-[10px] ml-auto flex-shrink-0 mt-px" style={{ color: 'var(--text-muted)' }}>
+          <span className="text-[0.625rem] ml-auto flex-shrink-0 mt-px" style={{ color: 'var(--text-muted)' }}>
             running
           </span>
         )}
@@ -88,7 +88,7 @@ function SubtaskBlock({ tool }: ToolBlockProps) {
           {childTools.map((ct) => (
             <div
               key={ct.id}
-              className="flex items-center gap-1.5 text-[11px]"
+              className="flex items-center gap-1.5 text-[0.6875rem]"
               style={{ color: 'var(--text-muted)' }}
             >
               <span className="font-mono flex-shrink-0">{'└'}</span>
@@ -108,17 +108,17 @@ function SubtaskBlock({ tool }: ToolBlockProps) {
         <div className="ml-5 mt-1.5 space-y-2">
           {prompt && (
             <div>
-              <p className="text-[10px] uppercase tracking-wider mb-1" style={{ color: 'var(--text-muted)' }}>
+              <p className="text-[0.625rem] uppercase tracking-wider mb-1" style={{ color: 'var(--text-muted)' }}>
                 Prompt
               </p>
               <pre
-                className="text-[11px] leading-relaxed overflow-x-auto rounded p-2"
+                className="text-[0.6875rem] leading-relaxed overflow-x-auto rounded p-2"
                 style={{
                   background: 'var(--bg-sidebar)',
                   border: '1px solid var(--border)',
                   color: 'var(--text-secondary)',
                   fontFamily: "'Söhne Mono', ui-monospace, monospace",
-                  maxHeight: '160px',
+                  maxHeight: '10rem',
                   whiteSpace: 'pre-wrap',
                   wordBreak: 'break-all',
                 }}
@@ -129,17 +129,17 @@ function SubtaskBlock({ tool }: ToolBlockProps) {
           )}
           {tool.output && (
             <div>
-              <p className="text-[10px] uppercase tracking-wider mb-1" style={{ color: 'var(--text-muted)' }}>
+              <p className="text-[0.625rem] uppercase tracking-wider mb-1" style={{ color: 'var(--text-muted)' }}>
                 Result
               </p>
               <pre
-                className="text-[11px] leading-relaxed overflow-x-auto rounded p-2"
+                className="text-[0.6875rem] leading-relaxed overflow-x-auto rounded p-2"
                 style={{
                   background: 'var(--bg-sidebar)',
                   border: '1px solid var(--border)',
                   color: 'var(--text-secondary)',
                   fontFamily: "'Söhne Mono', ui-monospace, monospace",
-                  maxHeight: '200px',
+                  maxHeight: '12.5rem',
                   whiteSpace: 'pre-wrap',
                   wordBreak: 'break-all',
                 }}
@@ -150,11 +150,11 @@ function SubtaskBlock({ tool }: ToolBlockProps) {
           )}
           {tool.error && (
             <div>
-              <p className="text-[10px] uppercase tracking-wider mb-1" style={{ color: 'var(--error)' }}>
+              <p className="text-[0.625rem] uppercase tracking-wider mb-1" style={{ color: 'var(--error)' }}>
                 Error
               </p>
               <pre
-                className="text-[11px] leading-relaxed rounded p-2"
+                className="text-[0.6875rem] leading-relaxed rounded p-2"
                 style={{
                   background: 'var(--error-bg)',
                   border: '1px solid var(--error-border)',
@@ -228,19 +228,19 @@ export default function ToolBlock({ tool }: ToolBlockProps) {
         )}
 
         {/* Status icon */}
-        <span className="font-mono text-[11px] flex-shrink-0" style={{ color: statusColor }}>
+        <span className="font-mono text-[0.6875rem] flex-shrink-0" style={{ color: statusColor }}>
           {statusIcon}
         </span>
 
         {/* Tool name */}
-        <span className="font-mono text-[11px] font-medium flex-shrink-0" style={{ color: 'var(--text-secondary)' }}>
+        <span className="font-mono text-[0.6875rem] font-medium flex-shrink-0" style={{ color: 'var(--text-secondary)' }}>
           {title}
         </span>
 
         {/* Input summary (single line, truncated) */}
         {summary && !open && (
           <span
-            className="text-[11px] truncate flex-1 min-w-0"
+            className="text-[0.6875rem] truncate flex-1 min-w-0"
             style={{ color: 'var(--text-muted)' }}
           >
             {summary}
@@ -249,7 +249,7 @@ export default function ToolBlock({ tool }: ToolBlockProps) {
 
         {/* Duration placeholder / running label */}
         {isRunning && (
-          <span className="text-[10px] ml-auto flex-shrink-0" style={{ color: 'var(--text-muted)' }}>
+          <span className="text-[0.625rem] ml-auto flex-shrink-0" style={{ color: 'var(--text-muted)' }}>
             running
           </span>
         )}
@@ -264,17 +264,17 @@ export default function ToolBlock({ tool }: ToolBlockProps) {
           {/* Input */}
           {tool.input && Object.keys(tool.input).length > 0 && (
             <div className="mt-2">
-              <p className="text-[10px] uppercase tracking-wider mb-1" style={{ color: 'var(--text-muted)' }}>
+              <p className="text-[0.625rem] uppercase tracking-wider mb-1" style={{ color: 'var(--text-muted)' }}>
                 Input
               </p>
               <pre
-                className="text-[11px] leading-relaxed overflow-x-auto rounded p-2"
+                className="text-[0.6875rem] leading-relaxed overflow-x-auto rounded p-2"
                 style={{
                   background: 'var(--bg-surface)',
                   border: '1px solid var(--border)',
                   color: 'var(--text-secondary)',
                   fontFamily: "'Söhne Mono', ui-monospace, monospace",
-                  maxHeight: '120px',
+                  maxHeight: '7.5rem',
                   whiteSpace: 'pre-wrap',
                   wordBreak: 'break-all',
                 }}
@@ -287,17 +287,17 @@ export default function ToolBlock({ tool }: ToolBlockProps) {
           {/* Output */}
           {tool.output && (
             <div className="mt-2">
-              <p className="text-[10px] uppercase tracking-wider mb-1" style={{ color: 'var(--text-muted)' }}>
+              <p className="text-[0.625rem] uppercase tracking-wider mb-1" style={{ color: 'var(--text-muted)' }}>
                 Output
               </p>
               <pre
-                className="text-[11px] leading-relaxed overflow-x-auto rounded p-2"
+                className="text-[0.6875rem] leading-relaxed overflow-x-auto rounded p-2"
                 style={{
                   background: 'var(--bg-surface)',
                   border: '1px solid var(--border)',
                   color: 'var(--text-secondary)',
                   fontFamily: "'Söhne Mono', ui-monospace, monospace",
-                  maxHeight: '160px',
+                  maxHeight: '10rem',
                   whiteSpace: 'pre-wrap',
                   wordBreak: 'break-all',
                 }}
@@ -310,11 +310,11 @@ export default function ToolBlock({ tool }: ToolBlockProps) {
           {/* Error */}
           {tool.error && (
             <div className="mt-2">
-              <p className="text-[10px] uppercase tracking-wider mb-1" style={{ color: 'var(--error)' }}>
+              <p className="text-[0.625rem] uppercase tracking-wider mb-1" style={{ color: 'var(--error)' }}>
                 Error
               </p>
               <pre
-                className="text-[11px] leading-relaxed rounded p-2"
+                className="text-[0.6875rem] leading-relaxed rounded p-2"
                 style={{
                   background: 'var(--error-bg)',
                   border: '1px solid var(--error-border)',

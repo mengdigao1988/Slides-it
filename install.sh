@@ -6,9 +6,11 @@
 #
 # What this does:
 #   1. Detects your platform and architecture
-#   2. Checks that opencode is installed (installs it if not)
-#   3. Downloads the matching slides-it binary from the latest GitHub Release
-#   4. Installs it to ~/.local/bin/slides-it
+#   2. Checks that Node.js is installed (installs via fnm if not — required for web search)
+#   3. Installs open-websearch globally (npm install -g)
+#   4. Checks that opencode is installed (installs it if not)
+#   5. Downloads the matching slides-it binary from the latest GitHub Release
+#   6. Installs it to ~/.local/bin/slides-it
 
 set -euo pipefail
 
@@ -63,7 +65,52 @@ info "Platform: $OS $ARCH → $ARTIFACT"
 need curl
 
 # ---------------------------------------------------------------------------
-# 3. Check / install opencode
+# 3. Check / install Node.js (required for web search)
+# ---------------------------------------------------------------------------
+
+if command -v node >/dev/null 2>&1; then
+    ok "Node.js is already installed ($(node --version 2>/dev/null || echo 'version unknown'))"
+else
+    info "Node.js not found — installing via fnm (required for web search)..."
+    curl -fsSL https://fnm.vercel.app/install | bash
+    export PATH="${HOME}/.local/share/fnm:${PATH}"
+    eval "$(fnm env 2>/dev/null || true)"
+    fnm install --lts
+    if command -v node >/dev/null 2>&1; then
+        ok "Node.js installed via fnm ($(node --version 2>/dev/null))"
+    else
+        warn "Node.js installation may not be on PATH yet. Web search requires Node.js."
+        warn "Install manually: https://nodejs.org/"
+    fi
+fi
+
+# Ensure fnm-managed Node.js is on PATH for the rest of this script
+if command -v fnm >/dev/null 2>&1; then
+    eval "$(fnm env 2>/dev/null || true)"
+fi
+
+# ---------------------------------------------------------------------------
+# 4. Install open-websearch (web search engine for AI)
+# ---------------------------------------------------------------------------
+
+if command -v open-websearch >/dev/null 2>&1; then
+    ok "open-websearch is already installed"
+else
+    if command -v npm >/dev/null 2>&1; then
+        info "Installing open-websearch globally..."
+        npm install -g open-websearch
+        if command -v open-websearch >/dev/null 2>&1; then
+            ok "open-websearch installed"
+        else
+            warn "open-websearch installed but may not be on PATH yet."
+        fi
+    else
+        warn "npm not available — skipping open-websearch install. Web search will be unavailable."
+    fi
+fi
+
+# ---------------------------------------------------------------------------
+# 5. Check / install opencode
 # ---------------------------------------------------------------------------
 
 if command -v opencode >/dev/null 2>&1; then
@@ -81,7 +128,7 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# 4. Resolve latest release tag from GitHub API
+# 6. Resolve latest release tag from GitHub API
 # ---------------------------------------------------------------------------
 
 info "Fetching latest slides-it release..."
@@ -102,7 +149,7 @@ ok "Latest release: $LATEST_TAG"
 DOWNLOAD_URL="https://github.com/${REPO}/releases/download/${LATEST_TAG}/${ARTIFACT}"
 
 # ---------------------------------------------------------------------------
-# 5. Download binary
+# 7. Download binary
 # ---------------------------------------------------------------------------
 
 info "Downloading ${ARTIFACT}..."
@@ -116,7 +163,7 @@ if ! curl -fsSL --progress-bar -o "$TMP_FILE" "$DOWNLOAD_URL"; then
 fi
 
 # ---------------------------------------------------------------------------
-# 6. Install to ~/.local/bin
+# 8. Install to ~/.local/bin
 # ---------------------------------------------------------------------------
 
 mkdir -p "$INSTALL_DIR"
@@ -127,15 +174,25 @@ chmod +x "$DEST"
 ok "Installed: $DEST"
 
 # ---------------------------------------------------------------------------
-# 7. Done
+# 9. Done
 # ---------------------------------------------------------------------------
 
 echo ""
 printf '\033[1;32mslides-it %s installed successfully!\033[0m\n' "$LATEST_TAG"
 echo ""
-echo "  To make slides-it and opencode permanently available in your shell, run:"
+echo "  To make all tools permanently available in your shell, add these to your shell config:"
 echo ""
-echo '    echo '"'"'export PATH="$HOME/.local/bin:$HOME/.opencode/bin:$PATH"'"'"' >> ~/.zshrc && source ~/.zshrc'
+echo '    # slides-it + opencode'
+echo '    export PATH="$HOME/.local/bin:$HOME/.opencode/bin:$PATH"'
+echo ""
+echo '    # fnm (Node.js version manager, required for web search)'
+echo '    eval "$(fnm env 2>/dev/null || true)"'
+echo ""
+echo "  Quick setup (zsh):"
+echo ""
+echo '    echo '"'"'export PATH="$HOME/.local/bin:$HOME/.opencode/bin:$PATH"'"'"' >> ~/.zshrc'
+echo '    echo '"'"'eval "$(fnm env 2>/dev/null || true)"'"'"' >> ~/.zshrc'
+echo '    source ~/.zshrc'
 echo ""
 echo "  Then get started:"
 echo "    slides-it            # launch the web UI"

@@ -103,7 +103,7 @@ export default function AtPopover({ query, workspacePath, onSelect, onClose }: A
   if (loading) {
     return (
       <div
-        className="absolute bottom-full mb-1 left-0 w-max min-w-72 max-w-[560px] rounded-xl px-3 py-2.5 text-[11px] z-50 flex items-center gap-2"
+        className="absolute bottom-full mb-1 left-0 w-max min-w-72 max-w-[35rem] rounded-xl px-3 py-2.5 text-[0.6875rem] z-50 flex items-center gap-2"
         style={{
           background: 'var(--bg-surface)',
           border: '1px solid var(--border)',
@@ -124,7 +124,7 @@ export default function AtPopover({ query, workspacePath, onSelect, onClose }: A
   if (!loading && results.length === 0) {
     return (
       <div
-        className="absolute bottom-full mb-1 left-0 w-max min-w-72 max-w-[560px] rounded-xl px-3 py-2 text-[11px] z-50"
+        className="absolute bottom-full mb-1 left-0 w-max min-w-72 max-w-[35rem] rounded-xl px-3 py-2 text-[0.6875rem] z-50"
         style={{
           background: 'var(--bg-surface)',
           border: '1px solid var(--border)',
@@ -139,7 +139,7 @@ export default function AtPopover({ query, workspacePath, onSelect, onClose }: A
 
   return (
     <div
-      className="absolute bottom-full mb-1 left-0 w-max min-w-72 max-w-[560px] rounded-xl overflow-hidden z-50"
+      className="absolute bottom-full mb-1 left-0 w-max min-w-72 max-w-[35rem] rounded-xl overflow-hidden z-50"
       style={{
         background: 'var(--bg-surface)',
         border: '1px solid var(--border)',
@@ -151,7 +151,7 @@ export default function AtPopover({ query, workspacePath, onSelect, onClose }: A
         className="px-3 py-1.5 flex items-center justify-between"
         style={{ borderBottom: '1px solid var(--border)' }}
       >
-        <span className="text-[10px] uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>
+        <span className="text-[0.625rem] uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>
           {headerLabel}
         </span>
       </div>
@@ -179,7 +179,7 @@ export default function AtPopover({ query, workspacePath, onSelect, onClose }: A
               <p className="text-xs truncate" style={{ color: 'var(--text-primary)' }} title={file.name}>
                 {file.name}
               </p>
-              <p className="text-[10px] whitespace-nowrap" style={{ color: 'var(--text-muted)' }} title={file.path}>
+              <p className="text-[0.625rem] whitespace-nowrap" style={{ color: 'var(--text-muted)' }} title={file.path}>
                 {file.path}
               </p>
             </div>
@@ -193,7 +193,7 @@ export default function AtPopover({ query, workspacePath, onSelect, onClose }: A
         style={{ borderTop: '1px solid var(--border)' }}
       >
         {['↑↓ navigate', 'Enter select', 'Esc close'].map((hint) => (
-          <span key={hint} className="text-[10px]" style={{ color: 'var(--text-muted)' }}>
+          <span key={hint} className="text-[0.625rem]" style={{ color: 'var(--text-muted)' }}>
             {hint}
           </span>
         ))}

@@ -92,7 +92,7 @@ export default function PreviewPanel({ htmlFile }: PreviewPanelProps) {
         </button>
         {lastFile && (
           <span
-            className="mt-2 text-[9px]"
+            className="mt-2 text-[0.5625rem]"
             style={{ writingMode: 'vertical-rl', color: 'var(--text-muted)' }}
           >
             preview
@@ -130,7 +130,7 @@ export default function PreviewPanel({ htmlFile }: PreviewPanelProps) {
           </svg>
         </button>
 
-        <span className="text-[10px] font-mono truncate flex-1" style={{ color: 'var(--text-muted)' }}>
+        <span className="text-[0.625rem] font-mono truncate flex-1" style={{ color: 'var(--text-muted)' }}>
           {lastFile ? lastFile.split('/').pop() : 'No preview yet'}
         </span>
 
@@ -171,7 +171,7 @@ export default function PreviewPanel({ htmlFile }: PreviewPanelProps) {
               {lastFile ? 'Loading preview…' : 'Preview will appear here'}
             </p>
             {!lastFile && (
-              <p className="text-[11px] mt-1" style={{ color: 'var(--text-muted)', opacity: 0.6 }}>
+              <p className="text-[0.6875rem] mt-1" style={{ color: 'var(--text-muted)', opacity: 0.6 }}>
                 Chat with the AI to generate slides
               </p>
             )}
