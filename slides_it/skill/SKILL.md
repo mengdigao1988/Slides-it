@@ -287,7 +287,7 @@ Follow these rules on every generation. They are non-negotiable.
   Content width tiers inside the canvas (use `max-width` + `margin: 0 auto` on
   a wrapper div inside `.slide-canvas`):
   - Default (`1200px`): Cover, Quote, Closing slides
-  - Wide (`1600px`): Feature Cards, Stats Row, Two-Column, Step Flow
+  - Wide (`1600px`): content-heavy slides (grids, multi-column, process flows)
 - **No `clamp()` — use fixed `px` for all sizes.** Since the canvas is always
   1920×1080 and JS handles scaling, all typography and spacing must be fixed `px`.
   The active design specifies exact pixel values.
@@ -375,19 +375,20 @@ Only add if user said **Yes** in Phase 1. Implementation: JS-based hover with
 
 ### Visual Quality Rules
 
-**Layout Diversity** — choose the layout based on content type, never default
-to a bullet list. The active design's **Content Mapping Guide** defines which
-layout variant to use for each content pattern — always consult it first.
+**Layout Diversity** — choose components and layout based on content type, never
+default to a bullet list. The active design's **Composition Guide** suggests
+which components work well for each content pattern — consult it first.
 
-The active design's **Slide Layout Variants** section defines the exact HTML/CSS
-patterns for each layout. Follow them precisely.
+The active design's **Component Library** defines the HTML/CSS for each
+component, and **Layout Primitives** defines the grid/flex patterns for
+arranging them. Combine components and layouts freely to serve the content.
 
 **Visual Hierarchy** — every slide must have exactly 1 dominant visual focal point.
 Forbidden: plain background + unstyled bullet list with zero decorative elements.
 
 **Animation and graphic element rules are defined by the active design.**
-Follow the design's Animations and Icons & Graphic Elements sections — do not
-override them with your own defaults.
+Follow the design's Component Library for animation CSS, icon usage, and
+decorative fill patterns.
 
 ---
 
@@ -442,27 +443,31 @@ you chose. Ask if they want any adjustments before proceeding.
 Write the complete DESIGN.md body for the new design. Use the **default design's
 DESIGN.md** as the canonical reference for section structure. Your output must
 include all of the same sections: Color Palette, Typography, Background Layers,
-Slide Layout, Cards & Containers, Accent Elements, Slide Layout Variants,
-Icons & Graphic Elements, Animations, Code Blocks, Do & Don't, Reduced Motion.
+Slide Layout, Component Library, Layout Primitives, Data Visualization (ECharts),
+Composition Guide, Code Blocks, Do & Don't, Reduced Motion.
 
 ---
 
 ### Phase T3 — Generate preview.html
 
-Write a self-contained HTML file with **7 slides** that showcases every layout
-variant defined in the design:
+Write a self-contained HTML file with **at least 7 slides** that demonstrates
+the design can handle all common presentation content types:
 
-1. **Cover** — title slide with design name, subtitle, date
-2. **Feature Cards** — 3-column card grid with icons
-3. **Stats Row** — 3 stat cards with large numbers (include counter animation if the design requires it)
-4. **Two-Column** — left text + right card with supporting evidence
-5. **Step Flow** — 4-step horizontal process with numbered circles and connectors
-6. **Quote Block** — large quote with accent border and attribution
-7. **Closing** — thank you + credit line
+1. **Cover** — title, subtitle, date/author
+2. **Content with parallel items** — multiple items presented side by side
+   (e.g., features, principles, team members)
+3. **Content with quantitative data** — large numbers, metrics, or statistics
+4. **Content with two distinct areas** — narrative paired with supporting
+   evidence, or data paired with explanation
+5. **Content with sequential process** — ordered steps or timeline
+6. **Content with a quote or key message** — emphasis on a single statement
+7. **Closing** — thank you, CTA, or summary
 
 Rules:
 - Use the exact CSS variables from the skill text you just generated
-- Each slide is a working reference for its layout variant — AI will copy these patterns
+- Each slide should demonstrate the design's visual style — collectively
+  showcase all components at least once (cards, stat cards, quote block,
+  step flow, evidence lists, chart containers, decorative fills, etc.)
 - Must use the 1920×1080 canvas with `transform: scale()` and `setupScaling()` JS
 - Must look great at 900×600px (DesignModal preview iframe size — canvas auto-scales)
 - Include working keyboard navigation, nav dots, and progress bar
@@ -557,20 +562,10 @@ The active design name is in the HTML comment at the top of this prompt:
 <!-- Active design: <name> -->
 ```
 
-**Before generating any slides**, fetch the full design details in one call:
-
-```bash
-curl -s http://localhost:3000/api/design/<name>
-```
-
-The JSON response contains:
-- `skill_md` — style instructions (also injected below after the `---` separator)
-- `preview_html` — canonical 7-slide HTML showcasing every layout variant
-  (Cover, Feature Cards, Stats Row, Two-Column, Step Flow, Quote Block, Closing).
-  This is the ground truth for visual style — match its patterns precisely when
-  generating slides.
-
-If `preview_html` is `null`, use `skill_md` as the sole visual reference.
+The active design's complete visual specification — Component Library, Layout
+Primitives, Composition Guide, and Data Visualization rules — is injected
+below after the `---` separator. This is your sole visual reference for
+generating slides.
 
 ---
 

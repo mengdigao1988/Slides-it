@@ -45,6 +45,11 @@ Apply this visual style when generating all slides in this session.
 - Stat number: `64px`, weight 700
 - Stat label: `15px`, uppercase
 - Text shadow on titles: `0 0 40px rgba(34, 211, 238, 0.3)` (subtle glow)
+- Line-height: `1.1` (h1), `1.2` (h2), `1.6` (subtitle, body-text), `1.7` (card-body, evidence-list)
+- Letter-spacing: `-0.02em` (h1), `-0.01em` (h2), `0.12em` (label), `0.06em` (stat-label)
+- Subtitle: weight 400
+- Body / card-body: weight 400
+- Stat label: weight 500
 
 All sizes are fixed `px` — designed for the 1920×1080 canvas. JS `transform: scale()`
 handles viewport adaptation. **Never use `clamp()` or viewport-relative units.**
@@ -136,7 +141,7 @@ body::after {
   scaled to fit the viewport via JS `transform: scale()`. See SKILL.md CSS Rules.
 - Content width tiers (inside canvas, via `max-width` + `margin: 0 auto`):
   - Default (`1200px`): Cover, Quote, Closing
-  - Wide (`1600px`): Feature Cards, Stats Row, Two-Column, Step Flow
+  - Wide (`1600px`): content-heavy slides (grids, multi-column, process flows)
 - Canvas padding: `60px 80px`
 - **Canvas utilization** — Elements should fill approximately 70–80% of the
   1920×1080 canvas area. Avoid large empty zones. Use taller cards (`min-height`),
@@ -154,7 +159,61 @@ body::after {
 - Title slide: large centered heading + glowing accent line beneath
 - Content slides: heading top-left, content below with glassmorphism cards
 
-### Cards & Glassmorphism
+### Component Library
+
+These are independent, composable building blocks. Mix them freely on any slide —
+they are not locked to specific layouts.
+
+#### Reveal Animation (.reveal)
+
+Add `.reveal` to any element that should animate on scroll. JS adds `.visible`
+via IntersectionObserver. Use `.title-reveal` for cover/closing slide headings.
+
+```css
+.reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+/* Stagger children */
+.reveal:nth-child(1) { transition-delay: 0s; }
+.reveal:nth-child(2) { transition-delay: 0.1s; }
+.reveal:nth-child(3) { transition-delay: 0.1s; }
+.reveal:nth-child(4) { transition-delay: 0.2s; }
+.reveal:nth-child(5) { transition-delay: 0.3s; }
+.reveal:nth-child(6) { transition-delay: 0.4s; }
+
+.title-reveal {
+    opacity: 0;
+    transform: translateY(24px) scale(0.97);
+    transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.title-reveal.visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+```
+
+#### Card (.card)
+
+Glassmorphism container for any grouped content — features, evidence, info blocks.
+
+```html
+<div class="card">
+    <i data-lucide="sparkles" class="card-icon"></i>
+    <p class="card-label">Label</p>
+    <p class="card-title">Title</p>
+    <p class="card-body">Body text describing the item.</p>
+</div>
+```
+
+All inner elements are optional — use only what the content needs.
 
 ```css
 .card {
@@ -163,75 +222,253 @@ body::after {
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid var(--border);
     border-radius: 16px;
-    padding: 32px;
+    padding: 36px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
     transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
 }
-
 .card:hover {
     transform: translateY(-4px);
     box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4), 0 0 0 1px var(--glow);
     border-color: var(--glow);
 }
+.card-icon        { width: 32px; height: 32px; color: var(--accent); margin-bottom: 16px; transition: transform 0.2s ease; }
+.card:hover .card-icon { transform: scale(1.15); }
+.card-label       { font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); margin-bottom: 10px; font-weight: 500; }
+.card-title       { font-family: 'Clash Display', sans-serif; font-size: 22px; margin-bottom: 12px; font-weight: 600; }
+.card-body        { font-size: 17px; color: var(--text-secondary); line-height: 1.7; flex: 1; }
 ```
 
-### Accent Elements
+#### Stat Card (.stat-card)
 
-- Left border accent on callouts: `border-left: 3px solid var(--accent)`
-- Gradient text for key phrases:
-  ```css
-  .gradient-text {
-      background: linear-gradient(135deg, var(--accent), var(--accent-2));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-  }
-  ```
-- Section dividers: `1px` horizontal rule with `var(--border)`
-- Glowing underline on important terms: `box-shadow: 0 2px 0 var(--accent)`
+Large metric display. Use `data-target` for counter animation, `.gradient-text` on numbers.
 
-### Animations
+```html
+<div class="stat-card">
+    <div class="stat-number gradient-text" data-target="85" data-suffix="%">0</div>
+    <div class="stat-label">Growth Rate</div>
+    <div class="stat-desc">Year over year revenue increase</div>
+</div>
+```
 
-- **Entrance (default)**: `opacity: 0 → 1` + `translateY(24px → 0)`, duration `0.6s`, easing `cubic-bezier(0.16, 1, 0.3, 1)`
-- **Stagger delay**: `0.1s` increments — delays: `0s, 0.1s, 0.1s, 0.2s, 0.3s, 0.4s` (3rd child shares 2nd child's delay)
-- **Card hover**: smooth `transform` + `box-shadow` transition (0.3s)
-- **Progress bar**: thin `3px` line at top, gradient from `var(--accent)` to `var(--accent-2)`
-- Trigger all entrance animations via `.visible` class added via `IntersectionObserver`
-- Cover slide title: combine `translateY` + subtle `scale(0.97 → 1)` for a weight-drop feel
-- Numeric data (percentages, dollar amounts, counts): JS counter animation counting from 0 to target on slide enter
-- List items must stagger — never reveal all items simultaneously
+```css
+.stat-card {
+    background: var(--bg-card);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 48px 40px;
+    text-align: center;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+.stat-number { font-family: 'Clash Display', sans-serif; font-size: 64px; font-weight: 700; line-height: 1; letter-spacing: -0.03em; margin-bottom: 12px; }
+.stat-label  { font-size: 15px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 500; margin-bottom: 12px; }
+.stat-desc   { font-size: 15px; color: var(--text-secondary); line-height: 1.5; opacity: 0.7; }
+```
 
-### Icons & Graphic Elements
+Counter animation JS: iterate elements with `data-target`, count from 0 to target on `.visible`.
 
-- Load Lucide icons via CDN: `<script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.js"></script>`
+#### Quote Block (.quote-block)
+
+```html
+<div class="quote-deco">&ldquo;</div>
+<div class="quote-block">
+    <blockquote>&ldquo;The quote text goes here.&rdquo;</blockquote>
+    <cite>Attribution</cite>
+</div>
+```
+
+```css
+.quote-block            { border-left: 3px solid var(--accent); padding: 24px 32px; background: rgba(34,211,238,0.06); border-radius: 0 8px 8px 0; }
+.quote-block blockquote { font-size: 36px; font-style: italic; line-height: 1.5; margin-bottom: 16px; text-shadow: 0 0 30px rgba(34,211,238,0.15); }
+.quote-block cite       { font-size: 14px; color: var(--accent); letter-spacing: 0.08em; text-transform: uppercase; font-style: normal; }
+.quote-deco             { position: absolute; font-family: 'Clash Display', sans-serif; font-size: 300px; line-height: 1; color: var(--accent); opacity: 0.06; pointer-events: none; z-index: 0; }
+```
+
+#### Step Flow (.step-flow)
+
+Horizontal process with numbered circles and connectors. Alternate `.step`
+and `.step-connector` as siblings inside `.step-flow`.
+
+```html
+<div class="step-flow">
+    <div class="step">
+        <div class="step-circle">1</div>
+        <div class="step-title">Describe</div>
+        <div class="step-desc">Tell us your topic and audience.</div>
+    </div>
+    <div class="step-connector"></div>
+    <div class="step">
+        <div class="step-circle">2</div>
+        <div class="step-title">Generate</div>
+        <div class="step-desc">AI creates your slides.</div>
+    </div>
+    <!-- more steps + connectors as needed -->
+</div>
+```
+
+```css
+.step-flow      { display: flex; align-items: flex-start; max-width: 1600px; margin: 0 auto; }
+.step           { flex: 1; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 16px; }
+.step-circle    { width: 64px; height: 64px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #fff; font-family: 'Clash Display', sans-serif; font-size: 24px; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 20px -8px rgba(34,211,238,0.5); flex-shrink: 0; }
+.step-connector { flex: 0 0 32px; height: 2px; background: var(--border); margin-top: 32px; align-self: flex-start; box-shadow: 0 0 6px rgba(34,211,238,0.1); }
+.step-title     { font-size: 20px; font-weight: 600; }
+.step-desc      { font-size: 16px; color: var(--text-secondary); line-height: 1.6; max-width: 200px; }
+```
+
+#### Evidence List (.evidence-list)
+
+Styled bullet list. Use inside `.card`, `.two-col-main`, or any container.
+
+```html
+<ul class="evidence-list">
+    <li>First piece of evidence or supporting point</li>
+    <li>Second supporting point</li>
+</ul>
+```
+
+```css
+.evidence-list    { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.evidence-list li { padding-left: 18px; position: relative; font-size: 18px; color: var(--text-primary); line-height: 1.5; }
+.evidence-list li::before { content: ''; position: absolute; left: 0; top: 0.55em; width: 5px; height: 5px; border-radius: 50%; background: var(--accent); }
+```
+
+#### Chart Container (.chart-container)
+
+Wrapper for any ECharts visualization. Can appear on any slide, in any layout.
+See §Data Visualization for chart type selection and theme-specific styling.
+
+```html
+<div class="chart-container" id="chart-{purpose}"
+     style="width:{w}px; height:{h}px"></div>
+```
+
+```css
+.chart-container { position: relative; flex-shrink: 0; }
+```
+
+Common sizing by context:
+- Inside a column (`.two-col-main`, `.two-col-aside`): `width:100%; height:320–400px`
+- Full-width standalone: `max-width:1400px; height:500px; margin:0 auto`
+- Inside a `.card` (sparkline/mini): `width:100%; height:140–200px`
+- Below a stats row: `max-width:1200px; height:300px; margin:24px auto 0`
+
+JS init pattern (inside `window.addEventListener('load', ...)`):
+```javascript
+if (typeof echarts !== 'undefined') {
+    const el = document.getElementById('chart-{purpose}');
+    if (el) {
+        const chart = echarts.init(el, null, { renderer: 'canvas' });
+        chart.setOption({ /* see §Data Visualization for theme options */ });
+    }
+}
+```
+
+#### Text Helpers
+
+```css
+h1             { font-family: 'Clash Display', sans-serif; font-size: 80px; font-weight: 700; line-height: 1.1; letter-spacing: -0.02em; text-shadow: 0 0 40px rgba(34,211,238,0.3); }
+h2             { font-family: 'Clash Display', sans-serif; font-size: 38px; font-weight: 600; line-height: 1.2; }
+.label         { font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); font-weight: 500; }
+.subtitle      { font-size: 24px; color: var(--text-secondary); line-height: 1.6; font-weight: 400; }
+.body-text     { font-size: 18px; color: var(--text-secondary); line-height: 1.6; }
+.gradient-text { background: linear-gradient(135deg, var(--accent), var(--accent-2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+```
+
+Use `.gradient-text` on 1–3 key words in a heading — never entire sentences. Max one per slide.
+
+#### Accent Lines
+
+```css
+.accent-line      { width: 48px; height: 3px; background: linear-gradient(90deg, var(--accent), var(--accent-2)); border-radius: 2px; margin: 20px 0; }
+.accent-line-wide { width: 200px; height: 2px; background: linear-gradient(90deg, var(--accent), transparent); border-radius: 2px; }
+```
+
+- `.accent-line` (short, gradient): decorative — place after headings to anchor the eye
+- `.accent-line-wide` (long, fade-out): decorative — sparse slide bottoms
+
+Use plain CSS `border-bottom` or `<hr>` for structural separation — not accent lines.
+
+#### Icons (Lucide)
+
+Load via CDN: `<script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.js"></script>`
+Use `<i data-lucide="icon-name" class="card-icon"></i>` and call `lucide.createIcons()` in JS.
+
 - Icon color: `var(--accent)`, size: `2rem`, hover: `scale(1.15)` transition
-- Every content slide must include at least one of:
-  - A Lucide icon relevant to the slide topic
-  - A decorative accent line, left border stripe, or geometric shape using the accent color
-  - Numbered circle badges for step/process slides
-  - A subtle background shape (low opacity, does not interfere with readability)
+- Choose abstractly: `sparkles` → innovation, `shield` → security, `zap` → performance,
+  `layers` → architecture, `globe` → global, `bar-chart` → data
+- Cards benefit most from icons. Stats and quotes: icons optional.
 
-### Slide Layout Variants
+#### Decorative Fills (.deco-blob, .deco-line)
 
-Use these layout patterns based on content type. All use glassmorphism cards with
-`backdrop-filter: blur(12px)` and the aurora color palette.
+Positioned-absolute background elements behind content.
 
-**Stats Row** — 3-column grid of glassmorphism stat cards, large numbers in
-`var(--accent)` with glow shadow, counter animation on slide enter.
+```css
+.deco-blob { position: absolute; border-radius: 50%; filter: blur(60px); pointer-events: none; z-index: 0; }
+.deco-line { position: absolute; pointer-events: none; z-index: 0; }
 
-**Two-Column** — left: heading + body text, right: glassmorphism card with
-supporting evidence. Gap: `64px`.
+/* Ensure content stacks above decorative fills */
+.slide-canvas > *:not(.deco-blob):not(.deco-line) { position: relative; z-index: 1; }
+```
 
-**Step Flow** — horizontal process with numbered circles in gradient
-(`var(--accent)` → `var(--accent-2)`), connector lines with subtle glow.
+Set size, color, opacity, and position via inline styles:
+- Typical `.deco-blob`: `width:300–500px; height:same; background:radial-gradient(circle, var(--accent) 0%, transparent 70%); opacity:0.06–0.10`
+- Typical `.deco-line`: `width:120–200px; height:2px; background:linear-gradient(90deg, var(--accent-2), transparent); opacity:0.3–0.5`
+- Sparse slides (cover, quote, closing): 2–3 deco elements
+- Dense slides (grids, multi-column): 0–1 deco elements
+- Never exceed 3 per slide
 
-**Feature Cards** — 2×2 grid of glassmorphism cards, each with Lucide icon in
-`var(--accent)`, accent top border using gradient.
+### Layout Primitives
 
-**Quote Block** — large text with `border-left: 3px solid var(--accent)`,
-subtle text glow, on a dark transparent card.
+Components can be placed in any of these layout arrangements.
+Mix layouts and components freely — these are tools, not templates.
 
-**Full-bleed Dark Callout** — single powerful statement, `--bg-primary` background
-with aurora ribbons more visible, large gradient text. Use max once per deck.
+#### Centered Stack
+
+`.slide-canvas` default behavior — `flex-direction: column; justify-content: center`.
+Use for: cover, closing, quote-focused, single-statement slides.
+
+#### Top-Aligned Stack
+
+Override `.slide-canvas` with `style="justify-content: flex-start; padding-top: 80px"`.
+Use for: content-heavy slides where vertical space matters.
+
+#### Two-Column Grid (.two-col)
+
+```html
+<div class="two-col">
+    <div class="two-col-main"><!-- primary content --></div>
+    <div class="two-col-aside"><!-- secondary content --></div>
+</div>
+```
+
+```css
+.two-col       { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: stretch; max-width: 1600px; margin: 0 auto; flex: 1; }
+.two-col-main  { display: flex; flex-direction: column; justify-content: center; }
+.two-col-main h2 { font-size: 36px; margin-bottom: 16px; }
+.two-col-main p  { font-size: 18px; color: var(--text-secondary); line-height: 1.7; }
+.two-col-aside { display: flex; flex-direction: column; }
+.two-col-aside .card { flex: 1; }
+```
+
+Either side can contain any components — cards, charts, text, evidence lists, stat cards.
+
+#### Three-Column Grid
+
+```css
+.card-grid  { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; max-width: 1600px; margin: 0 auto; flex: 1; align-content: stretch; }
+.stats-row  { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; max-width: 1600px; margin: 0 auto; }
+```
+
+Use `.card-grid` for cards, `.stats-row` for stat cards, or create a custom grid.
+For 2 items: `repeat(2, 1fr)`. For 4: `repeat(2, 1fr)` (2×2 grid).
+The grid container can hold any mix of components.
+
+#### Horizontal Flow
+
+Used by `.step-flow` — `display: flex; align-items: flex-start; max-width: 1600px`.
+Also works for timelines, comparison strips, or any horizontal sequence.
 
 ### Data Visualization (ECharts)
 
@@ -242,93 +479,119 @@ loaded via CDN:
 <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
 ```
 
-**Donut / Pie chart styling:**
-- Color palette: `['#22d3ee', '#a78bfa', '#34d399']` (aurora accent triad)
-- Background: `'transparent'`
-- Label color: `var(--text-secondary)` (`#94a3b8`)
-- Center label: large number/text in `var(--text-primary)`, Clash Display font
-- No outer border; subtle inner radius (~55-65%) for donut style
-- Animation: enabled (consistent with aurora theme's motion philosophy)
-- Legend: bottom-aligned, `var(--text-secondary)` color, `14px` Satoshi font
-- Container size on 1920×1080 canvas: `280–360px` square is typical
+#### Chart Type Selection
 
-**Integration rules:**
+Choose the chart type based on the data, not by habit. Different data patterns
+demand different visualizations:
+
+| Data Pattern | Chart Type | Common Placements |
+|---|---|---|
+| Proportions / composition (parts of a whole) | Pie / Donut | Any layout — pair with narrative or standalone |
+| Trends over time (growth, decline, cycles) | Line or Area | Full-width for detail, two-col for trend + commentary |
+| Category comparisons (A vs B vs C) | Vertical Bar | Full-width or two-col |
+| Rankings / sorted magnitudes | Horizontal Bar | Full-width (labels need room) |
+| Distribution / histogram | Vertical Bar (binned) | Full-width |
+| KPIs with sparkline context | Stats Row + small Line chart below | Custom composite |
+
+Layout is not fixed — pick the layout that serves the narrative. A chart can
+occupy one column of Two-Column, span full-width on its own slide, or sit
+inside a Feature Card as a small sparkline. Let the data and story decide.
+
+#### Shared Aurora chart styles
+
+All chart types share these aurora theme defaults:
+
+- **Color palette**: `['#22d3ee', '#a78bfa', '#34d399']` (aurora accent triad).
+  For >3 series, extend with `#f472b6` (pink) and `#fbbf24` (amber).
+- **Background**: `'transparent'`
+- **Axis labels / legend text**: `var(--text-secondary)` (`#94a3b8`), `14px` Satoshi font
+- **Grid lines**: `var(--surface-2)` (`rgba(148,163,184,0.08)`) — barely visible
+- **Animation**: enabled, `800ms`, `cubicOut` (consistent with aurora's motion philosophy)
+- **Tooltip**: dark background (`var(--bg-card)`), `var(--text-primary)` text, subtle border
+
+#### Pie / Donut
+
+- Inner radius `55-65%` for donut; `0` for full pie
+- `borderRadius: 6`, `borderColor: var(--bg-primary)`, `borderWidth: 3` for segment gaps
+- Center label: large number/text in `var(--text-primary)`, Clash Display font
+- Legend: bottom-aligned, `itemWidth: 12`, `itemGap: 20`
+- Container: `280–360px` square is typical
+
+#### Bar (vertical & horizontal)
+
+- `borderRadius: [4, 4, 0, 0]` (rounded top caps for vertical; `[0, 4, 4, 0]` for horizontal)
+- Bar width: `40-60%` of category gap — never touch adjacent bars
+- Optional gradient fill: `linearGradient` from accent color at 80% opacity to 40% opacity
+- For ≤5 categories: one color per bar from the aurora triad. For single-series: solid `var(--accent)`
+- Axis line: `1px` `var(--surface-2)`. Tick marks: hidden
+
+#### Line / Area
+
+- Line width: `2-3px`, smooth curves (`smooth: true`)
+- Optional glow: `shadowBlur: 8`, `shadowColor` matching line color at 40% opacity
+- Area fill: `linearGradient` from line color at 20% opacity (top) to transparent (bottom)
+- Data points: show on hover only (`symbol: 'none'`, `emphasis: { symbol: 'circle' }`)
+- For multiple series: one color per series from aurora triad, distinguish with solid vs dashed
+
+#### Integration rules
+
 - Initialize charts inside a `window.addEventListener('load', ...)` or after DOM ready
 - Use `echarts.init(container, null, { renderer: 'canvas' })` — canvas renderer for performance
 - Charts must use the aurora color palette — never default ECharts colors
 - Responsive: charts are inside the 1920×1080 canvas, scaled by JS `transform: scale()` —
   no need for ECharts `resize()` handling
 
-### Content Mapping Guide
+### Composition Guide
 
-Use this table to decide which layout variant fits the content. When a content
-pattern does not appear below, pick the closest match or combine layouts.
+#### Common Recipes
 
-| Content Pattern | Recommended Layout | Aurora Notes |
+These are starting points — not constraints. Combine any components with any
+layout primitive as the content demands.
+
+| Content Pattern | Suggested Recipe | Aurora Notes |
 |---|---|---|
-| 3–4 parallel items with titles | Feature Cards (3-col) | Each card: Lucide icon in `var(--accent)` + label + body text |
-| Key metrics / KPIs (2–4 numbers) | Stats Row | Counter animation from 0, `.gradient-text` on numbers |
-| Argument + supporting evidence | Two-Column | Left: narrative paragraphs, Right: glassmorphism evidence card |
-| Sequential process (3–5 steps) | Step Flow | Gradient circles (`--accent` → `--accent-2`), glowing connectors |
-| Memorable quote or key takeaway | Quote Block | `border-left: 3px`, text glow, large decorative `"` mark |
-| Single powerful statement / CTA | Full-bleed Dark Callout | Max once per deck. Large `.gradient-text`. Aurora ribbons more visible. |
-| Quantitative breakdown (proportions) | Two-Column + ECharts donut | Chart on one side, narrative on the other. Aurora triad colors. |
-| Timeline / milestones | Step Flow | Repurpose step circles as year/date markers |
-| Team / people (3–4 members) | Feature Cards | card-title → name, card-body → role/bio, icon optional |
-| Before vs After / Pros vs Cons | Two-Column | Each side: heading + evidence list with accent bullets |
-| 6+ items on one topic | Split across 2 slides | Maintain max 5 items per slide |
-| Table of Contents / Agenda | Feature Cards (no icons) | card-label → section number, card-title → section name, minimal body |
+| 3–4 parallel features | 3-col grid + card ×3 | Each card: Lucide icon + label + title + body |
+| Key metrics (2–4 KPIs) | 3-col grid + stat-card ×3 | Counter animation, `.gradient-text` on numbers |
+| Narrative + evidence | two-col + text in main, card with evidence-list in aside | Glassmorphism evidence card |
+| Sequential process (3–5 steps) | horizontal flow + step-flow | Gradient circles, glowing connectors |
+| Memorable quote | centered stack + quote-block + quote-deco | `border-left: 3px`, text glow |
+| Single powerful statement / CTA | centered stack + large heading + deco fills | `.gradient-text`. Max once per deck. |
+| Data visualization | any layout + chart-container | Chart type per data — see §Data Visualization |
+| KPIs with trend context | 3-col grid + stat-cards, then chart below | Headline numbers + supporting chart |
+| Team / people (3–4) | 3-col grid + card ×3 (no icons) | card-title → name, card-body → role |
+| Before vs After | two-col + content per side | Heading + evidence-list each column |
+| 6+ items on one topic | Split across 2 slides | Max 5 items per slide |
 
-#### Gradient-text usage
+#### Element Usage Rules
 
-- Apply `.gradient-text` to the 1–3 most important words in a title — never
-  entire sentences.
-- Typical targets: the key metric (`$4.2B`), the core concept
-  (`actually impress`), the CTA (`Get Started`).
-- Maximum one `.gradient-text` element per slide.
+**Gradient-text:** Apply to 1–3 key words in a heading — never entire sentences.
+Typical: key metric (`$4.2B`), core concept (`actually impress`), CTA (`Get Started`).
+Max one `.gradient-text` per slide.
 
-#### Accent line vs divider
+**Accent lines:** `.accent-line` (short, after headings) and `.accent-line-wide`
+(long, bottom of sparse slides) are decorative. Use plain `border-bottom` or
+`<hr>` for structural separation.
 
-- **accent-line** (gradient, short `48px`): decorative — place after headings to
-  anchor the eye downward.
-- **accent-line-wide** (gradient, long `200px`): decorative — place at bottom of
-  sparse slides as a visual anchor.
-- Use a plain CSS `border-bottom` or thin `<hr>` for structural separation
-  between content sections — not the gradient accent lines.
+**Icons (Lucide):** Choose abstractly: `sparkles` → innovation, `shield` → security,
+`zap` → performance, `layers` → architecture, `globe` → global, `bar-chart` → data.
+Cards benefit most from icons. Stats and quotes: icons optional.
+When unsure, omit — a strong heading beats a generic icon.
 
-#### Icon selection
+**Card labels:** Short category words (`Visual`, `Motion`) for thematic grouping.
+Sequential numbers (`01`, `02`, `03`) for ordered items. Omit when the title is clear.
 
-- Choose Lucide icons that represent the concept abstractly, not literally:
-  `sparkles` → innovation, `shield` → security, `zap` → performance,
-  `layers` → architecture, `globe` → global, `bar-chart` → data.
-- Every Feature Card should include a Lucide icon — it is the card's visual
-  anchor in this theme.
-- Stats Row and Quote Block: icons are optional — numbers and typography already
-  carry the visual weight.
-- When unsure, omit — a strong heading beats a generic icon.
-
-#### Card labels
-
-- Short category words (`Visual`, `Motion`, `Architecture`) for thematic grouping.
-- Sequential numbers (`01`, `02`, `03`) for ordered items.
-- Omit labels when the card-title is already self-explanatory.
-
-#### Decorative fills (deco-blob, deco-line)
-
-- Sparse slides (Cover, Quote, Closing): 2–3 deco elements to anchor the composition.
-- Dense slides (Cards, Stats, Two-Column, Step Flow): 0–1 deco elements — the
-  content itself fills the canvas.
-- Never exceed 3 deco elements on any single slide.
+**Decorative fills:** Sparse slides: 2–3 deco elements. Dense slides: 0–1. Never >3.
 
 #### Common Mistakes
 
-- Using Stats Row for non-numeric content → use Feature Cards instead.
-- Using bullet lists when Feature Cards or Step Flow would be clearer.
-- Putting both a chart AND a Stats Row on the same slide → pick one.
+- Using stat cards for non-numeric content → use cards instead.
+- Using bullet lists when cards or step-flow would be clearer.
+- Putting a chart AND stat cards on the same slide without clear hierarchy → pick a primary.
+- Always using donut charts for data → match chart type to data pattern (see §Data Visualization).
 - Applying `.gradient-text` to entire sentences → limit to 1–3 key words.
-- Adding Lucide icons to every element → reserve for Feature Cards and key callouts.
-- Using Full-bleed Dark Callout more than once → it loses its impact.
-- Leaving more than ~20 % of canvas visually empty → add decorative fills or expand content.
+- Adding Lucide icons to every element → reserve for cards and key callouts.
+- Using the single-statement/CTA layout more than once per deck → it loses impact.
+- Leaving more than ~20% of canvas visually empty → add deco fills or expand content.
 
 ### Code Blocks (if any)
 
