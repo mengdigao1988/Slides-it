@@ -200,6 +200,10 @@ Close the app, come back tomorrow, reopen the same folder — the conversation i
 
 No "sorry, the conversation is too long" errors. Chat for as long as needed — slides-it handles the rest behind the scenes. Iterate on a 30-page deck across dozens of messages without hitting any limits.
 
+## Token-saving
+
+Reference any file — screenshots, PDFs, spreadsheets, design mockups — and slides-it handles the heavy lifting so the AI doesn't have to. Large images and lengthy documents are processed down to size before the AI reads them, cutting token usage by up to 95% per file and keeping API costs low. Just `@` a file and go.
+
 ---
 
 # For Contributors

@@ -432,11 +432,10 @@ Reference implementation (include in the `<script>` block after `SlidePresentati
 
 ### Image Rules
 
-- Use direct file paths (`src="assets/logo.png"`) — not base64
-- Save processed images with `_processed` suffix, never overwrite originals
-- Resize images > 1MB using Pillow: `resize_max(max_dim=1200)`
-- Circular crop for logos: `crop_circle()`
+- Use direct file paths (`src="assets/logo.png"`) in HTML — not base64
+- Always use the **original** file path in HTML `<img src>` for full-quality rendering
 - Never repeat the same image on multiple slides (logos: title + closing only)
+- Image compression is handled automatically by the server (see File Access Rules below)
 
 ### Accessibility
 
@@ -670,33 +669,47 @@ The workspace `.ignore` file prevents binary formats from appearing in `grep`,
 The `read` tool works by **direct file path** and is **not** affected by
 `.ignore` — if you have a path, you can always `read` it.
 
-### Document files — use the slides-it document API
+### Documents AND images — use the slides-it document API
 
 `.pdf` `.xlsx` `.xls` `.docx` `.doc` `.pptx` `.ppt` `.csv`
+`.png` `.jpg` `.jpeg` `.gif` `.webp` `.bmp` `.tiff` `.tif` `.avif`
 
-These are binary formats whose content cannot be parsed by the `read` tool.
-Use the slides-it server API to extract their content as clean markdown
-(see **Phase 1.8** above for the full workflow):
+**ALL reference files (documents AND images) must go through the extract API.**
+The server handles document parsing and image compression automatically.
 
 | Endpoint | Method | Purpose |
 |----------|--------|---------|
 | `/api/documents` | GET | List all document & image files in the workspace |
-| `/api/documents/extract` | POST | Extract file content as clean markdown |
-| `/api/documents/info` | GET | Get file metadata (page count, sheet names) |
+| `/api/documents/extract` | POST | Extract document content OR compress an image |
+| `/api/documents/info` | GET | Get metadata (page count, dimensions, file size) |
 
-Supported formats: `.pdf` `.xlsx` `.xls` `.docx` `.doc` `.pptx` `.ppt` `.csv`
+#### For documents (PDF, Excel, Word, PPT, CSV):
+The server extracts content as clean markdown text. **NEVER** use the `read`
+tool on document files — it returns garbled binary data.
 
-**NEVER** use the `read` tool on document files — it returns garbled binary data.
+#### For images (PNG, JPG, GIF, WEBP, BMP, TIFF, AVIF):
+The server **compresses the image** (resizes to ≤1200px, converts to JPEG) and
+returns an `optimized_path`. Then use the `read` tool on that optimized path to
+**view** the image with drastically reduced token cost.
 
-### Image files
+**Image workflow:**
+```
+1. curl localhost:3000/api/documents/extract -X POST \
+     -H "Content-Type: application/json" \
+     -d '{"path": "photos/big-screenshot.png"}'
+   → Returns: optimized_path = "tmp/_optimized/big-screenshot_optimized.jpg"
+              (e.g. 4.2 MB → 180 KB)
 
-`.png` `.jpg` `.jpeg` `.gif` `.webp` `.bmp` `.tiff` `.tif` `.avif`
+2. read tmp/_optimized/big-screenshot_optimized.jpg
+   → You can now SEE the image content (colours, layout, text, etc.)
 
-When the user provides image file paths as references:
-- Use the `read` tool to view the image — it returns a visual attachment
-  that lets you see the image content (colours, layout, text in the image, etc.)
-- Then reference the image in slides via file paths (`src="path/to/image.png"`)
-- Images are also listed by `/api/documents` for discovery
+3. In HTML, reference the ORIGINAL path for full quality:
+   <img src="photos/big-screenshot.png" alt="...">
+```
+
+**NEVER** use `read` directly on the original image file — large images waste
+massive amounts of context tokens. Always extract first to get the compressed
+version.
 
 ### Binary files — never access
 

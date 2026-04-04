@@ -85,6 +85,9 @@ uv run pyinstaller \
     --hidden-import openpyxl \
     --hidden-import docx \
     --hidden-import pptx \
+    --hidden-import PIL \
+    --hidden-import PIL._imaging \
+    --hidden-import PIL.Image \
     --clean \
     --noconfirm \
     slides_it/cli.py

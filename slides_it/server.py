@@ -226,6 +226,8 @@ class ExtractResponse(BaseModel):
     sheet_names: list[str] | None = None # Excel sheet names
     truncated: bool = False
     hint: str = ""               # guidance for AI on how to get more content
+    optimized_path: str | None = None    # compressed image path (images only)
+    original_size_human: str | None = None  # original file size before compression
 
 
 class DocumentInfoResponse(BaseModel):
@@ -236,6 +238,8 @@ class DocumentInfoResponse(BaseModel):
     total_pages: int | None = None
     total_sheets: int | None = None
     sheet_names: list[str] | None = None
+    image_width: int | None = None       # image dimensions (images only)
+    image_height: int | None = None
 
 
 class FileRenameRequest(BaseModel):
@@ -1384,6 +1388,96 @@ def _extract_csv(file_path: pathlib.Path, max_chars: int) -> ExtractResponse:
     )
 
 
+# Maximum dimension (longest side) for compressed images sent to AI vision.
+_IMAGE_MAX_DIM = 1200
+# JPEG quality for compressed images.
+_IMAGE_JPEG_QUALITY = 70
+
+
+def _extract_image(file_path: pathlib.Path, max_chars: int) -> ExtractResponse:
+    """Compress an image and save an optimized copy for AI vision.
+
+    Strategy:
+    - Resize so the longest side is ≤ _IMAGE_MAX_DIM (1200px)
+    - Convert to JPEG quality=70 (transparent images get a white background)
+    - GIF: take the first frame only
+    - Save to <workspace>/tmp/_optimized/<stem>_optimized.jpg
+    - Return the optimized path so the AI can 'read' the small file
+
+    The original file is never modified — HTML <img src> should still reference
+    the original path for full-quality rendering.
+    """
+    from PIL import Image
+
+    if not _workspace_dir:
+        raise HTTPException(status_code=400, detail="No workspace is open.")
+
+    original_size = file_path.stat().st_size
+    ext = file_path.suffix.lower()
+
+    # Open image
+    try:
+        img = Image.open(file_path)
+    except Exception as exc:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Cannot open image: {file_path.name} — {exc}",
+        ) from exc
+
+    # GIF: take first frame
+    if getattr(img, "is_animated", False):
+        img.seek(0)
+
+    original_width, original_height = img.size
+
+    # Resize if either dimension exceeds the limit
+    if max(original_width, original_height) > _IMAGE_MAX_DIM:
+        ratio = _IMAGE_MAX_DIM / max(original_width, original_height)
+        new_w = int(original_width * ratio)
+        new_h = int(original_height * ratio)
+        img = img.resize((new_w, new_h), Image.LANCZOS)
+    else:
+        new_w, new_h = original_width, original_height
+
+    # Convert to RGB if necessary (handles RGBA, P, LA, etc.)
+    if img.mode in ("RGBA", "LA", "PA"):
+        background = Image.new("RGB", img.size, (255, 255, 255))
+        background.paste(img, mask=img.split()[-1])  # use alpha as mask
+        img = background
+    elif img.mode != "RGB":
+        img = img.convert("RGB")
+
+    # Save to tmp/_optimized/
+    optimized_dir = pathlib.Path(_workspace_dir) / "tmp" / "_optimized"
+    optimized_dir.mkdir(parents=True, exist_ok=True)
+    optimized_name = f"{file_path.stem}_optimized.jpg"
+    optimized_path = optimized_dir / optimized_name
+    img.save(optimized_path, "JPEG", quality=_IMAGE_JPEG_QUALITY, optimize=True)
+
+    new_size = optimized_path.stat().st_size
+    rel_original = str(file_path.relative_to(pathlib.Path(_workspace_dir)))
+    rel_optimized = str(optimized_path.relative_to(pathlib.Path(_workspace_dir)))
+
+    content_lines = [
+        f"Image compressed for AI viewing: {_human_size(original_size)} → {_human_size(new_size)}",
+        f"Dimensions: {original_width}×{original_height} → {new_w}×{new_h}",
+        f"",
+        f"Optimized path (use 'read' tool on this to VIEW the image):",
+        f"  {rel_optimized}",
+        f"",
+        f"Original path (use this in HTML <img src=\"...\"> for full quality):",
+        f"  {rel_original}",
+    ]
+
+    return ExtractResponse(
+        path=str(file_path),
+        type=ext.lstrip("."),
+        content="\n".join(content_lines),
+        optimized_path=rel_optimized,
+        original_size_human=_human_size(original_size),
+    )
+
+
 def _resolve_document_path(path_str: str) -> pathlib.Path:
     """Resolve a document path relative to workspace root, with validation."""
     p = pathlib.Path(path_str)
@@ -1447,11 +1541,14 @@ def list_documents() -> list[DocumentEntry]:
 
 @app.post("/api/documents/extract", response_model=ExtractResponse)
 def extract_document(req: ExtractRequest) -> ExtractResponse:
-    """Extract content from a document file and return it as markdown text.
+    """Extract content from a document or image file.
 
     Supported formats: PDF, Excel (.xlsx/.xls), Word (.docx), PowerPoint
-    (.pptx), and CSV. The server enforces a hard character limit to protect
-    against context window overflow.
+    (.pptx), CSV, and images (.png/.jpg/.jpeg/.gif/.webp/.bmp/.tiff/.avif).
+
+    For documents: returns extracted markdown text with a hard character limit.
+    For images: compresses the image and returns an optimized file path that
+    the AI can 'read' with drastically reduced token cost.
     """
     fp = _resolve_document_path(req.path)
     ext = fp.suffix.lower()
@@ -1467,19 +1564,21 @@ def extract_document(req: ExtractRequest) -> ExtractResponse:
         return _extract_pptx(fp, max_chars, req.pages)
     elif ext == ".csv":
         return _extract_csv(fp, max_chars)
+    elif ext in _IMAGE_EXTENSIONS:
+        return _extract_image(fp, max_chars)
     else:
         raise HTTPException(
             status_code=400,
-            detail=f"Unsupported file type: {ext}. Supported: .pdf, .xlsx, .xls, .docx, .doc, .pptx, .ppt, .csv",
+            detail=f"Unsupported file type: {ext}. Supported: .pdf, .xlsx, .xls, .docx, .doc, .pptx, .ppt, .csv, and image formats (.png, .jpg, .gif, .webp, .bmp, .tiff, .avif)",
         )
 
 
 @app.get("/api/documents/info", response_model=DocumentInfoResponse)
 def document_info(path: str = Query(..., description="Relative or absolute path to the file")) -> DocumentInfoResponse:
-    """Return metadata about a document file without extracting its content.
+    """Return metadata about a document or image file without extracting content.
 
-    Useful for the AI to check page count / sheet names before deciding how
-    much to extract.
+    Useful for the AI to check page count / sheet names / image dimensions
+    before deciding how much to extract.
     """
     fp = _resolve_document_path(path)
     ext = fp.suffix.lower()
@@ -1505,6 +1604,13 @@ def document_info(path: str = Query(..., description="Relative or absolute path 
         from pptx import Presentation
         prs = Presentation(fp)
         resp.total_pages = len(prs.slides)
+    elif ext in _IMAGE_EXTENSIONS:
+        from PIL import Image
+        try:
+            with Image.open(fp) as img:
+                resp.image_width, resp.image_height = img.size
+        except Exception:
+            pass  # non-critical — just skip dimensions
 
     return resp
 
