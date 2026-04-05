@@ -227,122 +227,20 @@ change and silently overwrite the same `slides/<topic-slug>.html` filename.
 
 Follow these rules on every generation. They are non-negotiable.
 
-### Structure
-
-```html
-<!DOCTYPE html>
-<html lang="{language}">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{Presentation Title}</title>
-    <link rel="stylesheet" href="{fontshare or google fonts url}">
-    <style>/* all styles inline */</style>
-</head>
-<body>
-    <div class="progress-bar"></div>
-    <nav class="nav-dots"></nav>
-    <section class="slide title-slide"> ... </section>
-    <section class="slide"> ... </section>
-    <!-- more slides -->
-    <script>/* all JS inline */</script>
-</body>
-</html>
-```
-
-### CSS Rules
-
-- **1920×1080 fixed canvas with `transform: scale()`** — every slide is designed
-  on a fixed 1920×1080 pixel canvas, then scaled to fit any viewport. This ensures
-  pixel-perfect 16:9 proportions on every device (desktop, tablet, phone landscape).
-  ```css
-  html {
-      scroll-snap-type: y mandatory;
-      overflow-y: scroll;
-      height: 100%;
-  }
-  .slide {
-      height: 100dvh;
-      scroll-snap-align: start;
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-  }
-  .slide-canvas {
-      width: 1920px;
-      height: 1080px;
-      flex-shrink: 0;
-      transform-origin: center center;
-      /* scale is set by JS — see setupScaling() */
-      overflow: hidden;
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      padding: 60px 80px;
-  }
-  ```
-  Content width tiers inside the canvas (use `max-width` + `margin: 0 auto` on
-  a wrapper div inside `.slide-canvas`):
-  - Default (`1200px`): Cover, Quote, Closing slides
-  - Wide (`1600px`): content-heavy slides (grids, multi-column, process flows)
-- **No `clamp()` — use fixed `px` for all sizes.** Since the canvas is always
-  1920×1080 and JS handles scaling, all typography and spacing must be fixed `px`.
-  The active design specifies exact pixel values.
-- All colors and sizes via **CSS custom properties** on `:root` — never hardcode
-- Fonts from Fontshare or Google Fonts — never system fonts
+- Generate a **single self-contained `.html` file** — all CSS in one `<style>` block,
+  all JS in one `<script>` block. No external stylesheets or scripts (except font
+  CDNs, Lucide icons CDN, and ECharts CDN when charts are needed).
+- **Follow the active design** for the complete HTML structure, CSS (including
+  canvas scaling, scroll-snap, navigation, components), and JavaScript
+  (`SlidePresentation` class with all methods fully implemented).
+- **Vanilla JS only** — no React, Vue, jQuery, or any external JS framework.
+- All colors and sizes via **CSS custom properties** on `:root` — never hardcode.
+- Fonts from Fontshare or Google Fonts — never system fonts.
 - **Icons — Lucide only.** Load via CDN:
   `<script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.js"></script>`
   Use `<i data-lucide="icon-name">` and call `lucide.createIcons()` in JS.
   Never use any other icon library (no Font Awesome, no Heroicons, no Material Icons).
-- Animations triggered by `.visible` class (added by JS via IntersectionObserver)
-- Stagger children: `.reveal:nth-child(n) { transition-delay: calc(n * 0.08s) }`
-- Always include `prefers-reduced-motion` rule:
-  ```css
-  @media (prefers-reduced-motion: reduce) {
-      .reveal { transition: none; opacity: 1; transform: none; }
-  }
-  ```
-
-### JavaScript Rules
-
-- Vanilla JS only — no frameworks, no CDN imports (except Lucide icons)
-- All logic in the `SlidePresentation` class:
-
-```javascript
-class SlidePresentation {
-    constructor() {
-        this.slides = document.querySelectorAll('.slide');
-        this.currentSlide = 0;
-        this.setupScaling();          // 1920×1080 → viewport fit
-        this.setupIntersectionObserver();
-        this.setupKeyboardNav();   // arrows, space, page up/down
-        this.setupTouchNav();      // swipe support
-        this.setupMouseWheel();    // wheel navigation
-        this.setupProgressBar();
-        this.setupNavDots();
-    }
-
-    setupScaling() {
-        const canvases = document.querySelectorAll('.slide-canvas');
-        const BASE_W = 1920, BASE_H = 1080;
-        const update = () => {
-            const vw = window.innerWidth;
-            const vh = window.innerHeight;
-            const scale = Math.min(vw / BASE_W, vh / BASE_H);
-            canvases.forEach(c => { c.style.transform = `scale(${scale})`; });
-        };
-        window.addEventListener('resize', update);
-        update();
-    }
-
-    // ... full implementations of all other methods
-}
-new SlidePresentation();
-```
-
-All methods must be **fully implemented** — no empty stubs, no `// TODO` comments.
+- All JS methods must be **fully implemented** — no empty stubs, no `// TODO` comments.
 
 ### Inline Editing
 
@@ -436,10 +334,12 @@ Reference implementation (include in the `<script>` block after `SlidePresentati
 - Always use the **original** file path in HTML `<img src>` for full-quality rendering
 - Never repeat the same image on multiple slides (logos: title + closing only)
 - Image compression is handled automatically by the server (see File Access Rules below)
+- **Use the active design's image components** (`.image-card`, `.card-img`, `.avatar`)
+  for displaying images — they provide proper rounded corners and cropping
 
 ### Accessibility
 
-- Semantic HTML: `<section>` for slides, `<nav>` for dots, ARIA labels on controls
+- Semantic HTML throughout — use appropriate elements for structure
 - Full keyboard navigation must work
 - `prefers-reduced-motion` must disable all transitions
 

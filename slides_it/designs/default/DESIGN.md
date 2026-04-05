@@ -138,11 +138,13 @@ body::after {
 ### Slide Layout
 
 - **1920×1080 fixed canvas** — each slide uses a `.slide-canvas` (1920×1080px),
-  scaled to fit the viewport via JS `transform: scale()`. See SKILL.md CSS Rules.
+  scaled to fit the viewport via JS `transform: scale()`.
 - Content width tiers (inside canvas, via `max-width` + `margin: 0 auto`):
   - Default (`1200px`): Cover, Quote, Closing
   - Wide (`1600px`): content-heavy slides (grids, multi-column, process flows)
 - Canvas padding: `60px 80px`
+- **No `clamp()` — use fixed `px` for all sizes.** The canvas is always
+  1920×1080 and JS handles scaling, so all typography and spacing must be fixed `px`.
 - **Canvas utilization** — Elements should fill approximately 70–80% of the
   1920×1080 canvas area. Avoid large empty zones. Use taller cards (`min-height`),
   larger stat numbers, wider grids, and generous card padding to occupy available
@@ -158,6 +160,289 @@ body::after {
   - **Never** leave more than ~20% of the canvas visually empty on any slide.
 - Title slide: large centered heading + glowing accent line beneath
 - Content slides: heading top-left, content below with glassmorphism cards
+
+### HTML Structure
+
+Every generated presentation must use this exact HTML skeleton:
+
+```html
+<!DOCTYPE html>
+<html lang="{language}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{Presentation Title}</title>
+    <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&f[]=satoshi@400,500&display=swap">
+    <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.js"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>  ← only if charts needed -->
+    <style>/* all CSS here */</style>
+</head>
+<body>
+    <!-- Aurora background layers -->
+    <div class="aurora-1"></div>
+    <div class="aurora-2"></div>
+    <div class="aurora-3"></div>
+    <div class="stars"></div>
+
+    <!-- Navigation -->
+    <div class="progress-bar" id="progressBar"></div>
+    <nav class="nav-dots" id="navDots" aria-label="Slide navigation"></nav>
+
+    <!-- Slides -->
+    <section class="slide title-slide" data-index="0">
+        <div class="slide-canvas"> ... </div>
+    </section>
+    <section class="slide" data-index="1">
+        <div class="slide-canvas"> ... </div>
+    </section>
+    <!-- more slides, each with data-index -->
+
+    <script>/* all JS here */</script>
+</body>
+</html>
+```
+
+### Core CSS
+
+```css
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+    scroll-snap-type: y mandatory;
+    overflow-y: scroll;
+    height: 100%;
+}
+
+body {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: 'Satoshi', ui-sans-serif, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    height: 100%;
+}
+
+.slide {
+    height: 100dvh;
+    scroll-snap-align: start;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+}
+
+.slide-canvas {
+    width: 1920px;
+    height: 1080px;
+    flex-shrink: 0;
+    transform-origin: center center;
+    /* scale set by JS setupScaling() */
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 60px 80px;
+}
+```
+
+### Navigation & Progress
+
+#### Progress Bar
+
+```css
+.progress-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    width: 0%;
+    z-index: 100;
+    transition: width 0.2s ease;
+    box-shadow: 0 0 8px var(--glow);
+}
+```
+
+#### Nav Dots
+
+```css
+.nav-dots {
+    position: fixed;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 100;
+}
+.nav-dots button {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    border: 1px solid rgba(34, 211, 238, 0.4);
+    background: transparent;
+    cursor: pointer;
+    padding: 0;
+    transition: background 0.2s, border-color 0.2s;
+}
+.nav-dots button.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    box-shadow: 0 0 6px var(--glow);
+}
+```
+
+#### Reduced Motion
+
+```css
+@media (prefers-reduced-motion: reduce) {
+    .aurora-1, .aurora-2, .aurora-3 {
+        animation: none;
+        opacity: 0.3;
+    }
+    .reveal {
+        transition: opacity 0.4s ease;
+        transform: none !important;
+    }
+}
+```
+
+### SlidePresentation Class (Complete JavaScript)
+
+All presentations must include this complete `SlidePresentation` class. Every
+method is fully implemented — copy this exactly and include it in the `<script>`
+block.
+
+```javascript
+class SlidePresentation {
+    constructor() {
+        this.slides = document.querySelectorAll('.slide');
+        this.currentSlide = 0;
+        this.setupScaling();
+        this.setupProgressBar();
+        this.setupNavDots();
+        this.setupIntersectionObserver();
+        this.setupKeyboardNav();
+        this.setupTouchNav();
+        this.setupMouseWheel();
+    }
+
+    /* Scale 1920×1080 canvases to fit viewport */
+    setupScaling() {
+        const canvases = document.querySelectorAll('.slide-canvas');
+        const BASE_W = 1920, BASE_H = 1080;
+        const update = () => {
+            const vw = window.innerWidth;
+            const vh = window.innerHeight;
+            const scale = Math.min(vw / BASE_W, vh / BASE_H);
+            canvases.forEach(c => { c.style.transform = `scale(${scale})`; });
+        };
+        window.addEventListener('resize', update);
+        update();
+    }
+
+    /* Horizontal progress bar at top */
+    setupProgressBar() {
+        const bar = document.getElementById('progressBar');
+        const update = () => {
+            const scrolled = window.scrollY;
+            const total = document.body.scrollHeight - window.innerHeight;
+            bar.style.width = total > 0 ? (scrolled / total * 100) + '%' : '0%';
+        };
+        window.addEventListener('scroll', update, { passive: true });
+        update();
+    }
+
+    /* Vertical dot navigation on right side */
+    setupNavDots() {
+        const nav = document.getElementById('navDots');
+        this.slides.forEach((_, i) => {
+            const btn = document.createElement('button');
+            btn.setAttribute('aria-label', `Go to slide ${i + 1}`);
+            if (i === 0) btn.classList.add('active');
+            btn.addEventListener('click', () => this.goTo(i));
+            nav.appendChild(btn);
+        });
+        this.dots = nav.querySelectorAll('button');
+
+        const obs = new IntersectionObserver((entries) => {
+            entries.forEach(e => {
+                if (e.isIntersecting) {
+                    const idx = parseInt(e.target.dataset.index);
+                    this.dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+                    this.currentSlide = idx;
+                }
+            });
+        }, { threshold: 0.5 });
+        this.slides.forEach(s => obs.observe(s));
+    }
+
+    /* Reveal animations on scroll */
+    setupIntersectionObserver() {
+        const obs = new IntersectionObserver((entries) => {
+            entries.forEach(e => {
+                if (e.isIntersecting) {
+                    e.target.querySelectorAll('.reveal, .title-reveal').forEach(el => el.classList.add('visible'));
+                    /* If animateCounters is defined, call it for stat cards */
+                    if (typeof animateCounters === 'function') animateCounters(e.target);
+                }
+            });
+        }, { threshold: 0.15 });
+        this.slides.forEach(s => obs.observe(s));
+    }
+
+    /* Arrow keys, Space, PageUp/PageDown */
+    setupKeyboardNav() {
+        document.addEventListener('keydown', e => {
+            if (['ArrowDown', 'ArrowRight', ' ', 'PageDown'].includes(e.key)) {
+                e.preventDefault();
+                this.goTo(this.currentSlide + 1);
+            } else if (['ArrowUp', 'ArrowLeft', 'PageUp'].includes(e.key)) {
+                e.preventDefault();
+                this.goTo(this.currentSlide - 1);
+            }
+        });
+    }
+
+    /* Swipe support for touch devices */
+    setupTouchNav() {
+        let startY = 0;
+        document.addEventListener('touchstart', e => { startY = e.touches[0].clientY; }, { passive: true });
+        document.addEventListener('touchend', e => {
+            const dy = startY - e.changedTouches[0].clientY;
+            if (Math.abs(dy) > 40) this.goTo(this.currentSlide + (dy > 0 ? 1 : -1));
+        }, { passive: true });
+    }
+
+    /* Debounced mouse wheel navigation (800ms) */
+    setupMouseWheel() {
+        let last = 0;
+        document.addEventListener('wheel', e => {
+            const now = Date.now();
+            if (now - last < 800) return;
+            last = now;
+            this.goTo(this.currentSlide + (e.deltaY > 0 ? 1 : -1));
+        }, { passive: true });
+    }
+
+    /* Scroll to slide by index */
+    goTo(idx) {
+        const clamped = Math.max(0, Math.min(this.slides.length - 1, idx));
+        this.slides[clamped].scrollIntoView({ behavior: 'smooth' });
+        this.currentSlide = clamped;
+    }
+}
+
+new SlidePresentation();
+```
+
+After the `SlidePresentation` class, include:
+1. `lucide.createIcons();` to render Lucide icons
+2. Counter animation function (if stat cards with `data-target` are present)
+3. ECharts initialization (if charts are present)
+4. Inline editing code (see SKILL.md)
 
 ### Component Library
 
@@ -200,6 +485,28 @@ via IntersectionObserver. Use `.title-reveal` for cover/closing slide headings.
 }
 ```
 
+#### Showcase (.showcase)
+
+Semi-transparent container that frames a component or image with padding and
+visual depth. Use inside `.two-col-aside`, `.two-col-main`, or as a standalone
+wrapper when a component needs a "stage" rather than sitting directly on the
+slide background. Vertically and horizontally centers its content.
+
+```css
+.showcase {
+    padding: 32px;
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+}
+```
+
 #### Card (.card)
 
 Glassmorphism container for any grouped content — features, evidence, info blocks.
@@ -226,6 +533,7 @@ All inner elements are optional — use only what the content needs.
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
     display: flex;
     flex-direction: column;
+    justify-content: flex-start;
     transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
 }
 .card:hover {
@@ -239,6 +547,114 @@ All inner elements are optional — use only what the content needs.
 .card-title       { font-family: 'Clash Display', sans-serif; font-size: 22px; margin-bottom: 12px; font-weight: 600; }
 .card-body        { font-size: 17px; color: var(--text-secondary); line-height: 1.7; flex: 1; }
 ```
+
+#### Image Card (.image-card)
+
+Standalone image with rounded corners and optional caption. Use for product shots,
+screenshots, team photos, or any visual that deserves its own space.
+
+```html
+<div class="image-card">
+    <img src="photo.jpg" alt="Description">
+    <p class="image-card-caption">Optional caption text</p>
+</div>
+```
+
+Caption is optional — omit when the image is self-explanatory.
+
+```css
+.image-card {
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+}
+.image-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+.image-card-caption {
+    padding: 16px 20px;
+    font-size: 14px;
+    color: var(--text-secondary);
+    background: var(--bg-card);
+    backdrop-filter: blur(12px);
+}
+```
+
+Sizing: set `width` and `height` on `.image-card` via inline style to control
+aspect ratio. Typical: `width:100%; height:400px` in a column, or
+`width:480px; height:320px` standalone.
+
+#### Card with Image Header (.card-img)
+
+Card variant with an image at the top and text content below. Use for team
+members, portfolio items, or any card where a visual header adds context.
+
+```html
+<div class="card card-img">
+    <div class="card-img-top">
+        <img src="photo.jpg" alt="Description">
+    </div>
+    <p class="card-title">Title</p>
+    <p class="card-body">Description text goes here.</p>
+</div>
+```
+
+```css
+.card-img {
+    padding: 0;
+    overflow: hidden;
+}
+.card-img-top {
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+}
+.card-img-top img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+.card-img .card-title,
+.card-img .card-body,
+.card-img .card-label {
+    padding-left: 36px;
+    padding-right: 36px;
+}
+.card-img .card-title { padding-top: 24px; }
+.card-img .card-body  { padding-bottom: 36px; }
+```
+
+#### Avatar (.avatar)
+
+Circular cropped image for people, team members, or profile pictures.
+
+```html
+<img src="person.jpg" alt="Name" class="avatar avatar-lg">
+```
+
+```css
+.avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--border);
+    box-shadow: 0 0 12px var(--glow);
+    flex-shrink: 0;
+}
+.avatar-sm { width: 48px; height: 48px; }
+.avatar-lg { width: 96px; height: 96px; }
+```
+
+Pair with card text for team slides: avatar left, name + role right. Or use
+in a horizontal row for a team overview.
 
 #### Stat Card (.stat-card)
 
@@ -261,6 +677,10 @@ Large metric display. Use `data-target` for counter animation, `.gradient-text` 
     padding: 48px 40px;
     text-align: center;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 .stat-number { font-family: 'Clash Display', sans-serif; font-size: 64px; font-weight: 700; line-height: 1; letter-spacing: -0.03em; margin-bottom: 12px; }
 .stat-label  { font-size: 15px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 500; margin-bottom: 12px; }
@@ -280,7 +700,7 @@ Counter animation JS: iterate elements with `data-target`, count from 0 to targe
 ```
 
 ```css
-.quote-block            { border-left: 3px solid var(--accent); padding: 24px 32px; background: rgba(34,211,238,0.06); border-radius: 0 8px 8px 0; }
+.quote-block            { display: flex; flex-direction: column; justify-content: center; border-left: 3px solid var(--accent); padding: 24px 32px; background: rgba(34,211,238,0.06); border-radius: 0 8px 8px 0; }
 .quote-block blockquote { font-size: 36px; font-style: italic; line-height: 1.5; margin-bottom: 16px; text-shadow: 0 0 30px rgba(34,211,238,0.15); }
 .quote-block cite       { font-size: 14px; color: var(--accent); letter-spacing: 0.08em; text-transform: uppercase; font-style: normal; }
 .quote-deco             { position: absolute; font-family: 'Clash Display', sans-serif; font-size: 300px; line-height: 1; color: var(--accent); opacity: 0.06; pointer-events: none; z-index: 0; }
@@ -448,7 +868,7 @@ Use for: content-heavy slides where vertical space matters.
 .two-col-main  { display: flex; flex-direction: column; justify-content: center; }
 .two-col-main h2 { font-size: 36px; margin-bottom: 16px; }
 .two-col-main p  { font-size: 18px; color: var(--text-secondary); line-height: 1.7; }
-.two-col-aside { display: flex; flex-direction: column; }
+.two-col-aside { display: flex; flex-direction: column; justify-content: center; }
 .two-col-aside .card { flex: 1; }
 ```
 
@@ -616,19 +1036,3 @@ pre, code {
 - **Don't** use more than 3 accent colors on a single slide
 - **Don't** clutter slides — max 5 bullet points per slide
 - **Don't** disable `prefers-reduced-motion` — provide smoother alternatives
-
-### Reduced Motion
-
-Respect users who prefer reduced motion:
-```css
-@media (prefers-reduced-motion: reduce) {
-    .aurora-1, .aurora-2, .aurora-3 {
-        animation: none;
-        opacity: 0.3;
-    }
-    .reveal {
-        transition: opacity 0.4s ease;
-        transform: none !important;
-    }
-}
-```
