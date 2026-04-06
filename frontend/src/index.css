@@ -90,6 +90,35 @@ body {
   padding: 1rem;
   overflow-x: auto;
   margin-bottom: 0.75rem;
+  position: relative;
+}
+
+/* ── Code block copy button ──────────────────────────── */
+.code-copy-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  background: rgba(255, 255, 255, 0.7);
+  color: var(--text-muted);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s ease, color 0.15s ease, background 0.15s ease;
+  backdrop-filter: blur(4px);
+}
+.chat-markdown pre:hover .code-copy-btn {
+  opacity: 1;
+}
+.code-copy-btn:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.95);
+  border-color: var(--border-strong);
 }
 .chat-markdown code:not([class]) {
   background-color: #F0EEE8 !important;

@@ -893,7 +893,7 @@ wheels = [
 
 [[package]]
 name = "slides-it"
-version = "1.7.10"
+version = "1.8.1"
 source = { editable = "." }
 dependencies = [
     { name = "fastapi" },

@@ -82,30 +82,56 @@ function SubtaskBlock({ tool }: ToolBlockProps) {
         )}
       </button>
 
-      {/* Child tool lines: └ Read file.ts / └ Grep pattern */}
-      {childTools.length > 0 && (
-        <div className="ml-5 space-y-0.5">
-          {childTools.map((ct) => (
+      {/* Collapsed: show only the latest child tool */}
+      {!open && childTools.length > 0 && (() => {
+        const latest = childTools[childTools.length - 1]
+        return (
+          <div className="ml-5">
             <div
-              key={ct.id}
               className="flex items-center gap-1.5 text-[0.6875rem]"
               style={{ color: 'var(--text-muted)' }}
             >
               <span className="font-mono flex-shrink-0">{'└'}</span>
               <span className="font-mono font-medium flex-shrink-0" style={{ color: 'var(--text-secondary)' }}>
-                {formatToolName(ct.tool || ct.name)}
+                {formatToolName(latest.tool || latest.name)}
               </span>
               <span className="truncate min-w-0">
-                {inputSummary(ct.input)}
+                {inputSummary(latest.input)}
               </span>
+              {childTools.length > 1 && (
+                <span className="flex-shrink-0 ml-1" style={{ color: 'var(--text-muted)', opacity: 0.7 }}>
+                  +{childTools.length - 1} more
+                </span>
+              )}
             </div>
-          ))}
-        </div>
-      )}
+          </div>
+        )
+      })()}
 
-      {/* Expanded: show full prompt + output */}
+      {/* Expanded: show all child tools + prompt + output */}
       {open && (
         <div className="ml-5 mt-1.5 space-y-2">
+          {/* All child tool lines */}
+          {childTools.length > 0 && (
+            <div className="space-y-0.5">
+              {childTools.map((ct) => (
+                <div
+                  key={ct.id}
+                  className="flex items-center gap-1.5 text-[0.6875rem]"
+                  style={{ color: 'var(--text-muted)' }}
+                >
+                  <span className="font-mono flex-shrink-0">{'└'}</span>
+                  <span className="font-mono font-medium flex-shrink-0" style={{ color: 'var(--text-secondary)' }}>
+                    {formatToolName(ct.tool || ct.name)}
+                  </span>
+                  <span className="truncate min-w-0">
+                    {inputSummary(ct.input)}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+
           {prompt && (
             <div>
               <p className="text-[0.625rem] uppercase tracking-wider mb-1" style={{ color: 'var(--text-muted)' }}>
